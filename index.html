@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mi Investigación Genealógica — GALACHE v2.0</title>
-
-<style>
+<title>Antepasados — GALACHE v3.0</title><style>
 :root{
   --bg:#111;
   --card:#1c1c1c;
@@ -16,6 +13,7 @@
   --green:#54c878;
   --red:#e96b6b;
   --blue:#64a9e8;
+  --orange:#ffb45e;
   --border:#3b3b3b;
 }
 
@@ -38,7 +36,7 @@ header{
 header h1{
   margin:0;
   color:var(--gold);
-  font-size:21px;
+  font-size:22px;
 }
 
 header small{
@@ -52,6 +50,9 @@ nav{
   overflow-x:auto;
   background:#191919;
   border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 
 nav button{
@@ -122,7 +123,7 @@ textarea{
 }
 
 textarea{
-  min-height:90px;
+  min-height:100px;
   resize:vertical;
 }
 
@@ -154,6 +155,15 @@ button.danger{
   cursor:pointer;
 }
 
+button.info{
+  background:#203b55;
+  color:#fff;
+  border:1px solid #35658b;
+  border-radius:7px;
+  padding:9px 12px;
+  cursor:pointer;
+}
+
 .actions{
   display:flex;
   gap:8px;
@@ -176,6 +186,7 @@ th,td{
 
 th{
   color:var(--gold);
+  width:170px;
 }
 
 .badge{
@@ -203,12 +214,13 @@ th{
 
 .person-row strong{
   color:#fff;
+  font-size:15px;
 }
 
 .person-row .meta{
   color:#999;
   font-size:12px;
-  margin-top:4px;
+  margin-top:5px;
 }
 
 .tree{
@@ -225,7 +237,7 @@ th{
 }
 
 .person-box{
-  width:210px;
+  width:215px;
   background:#202020;
   border:2px solid #555;
   border-radius:10px;
@@ -235,6 +247,10 @@ th{
 
 .person-box.main{
   border-color:var(--gold);
+}
+
+.person-box.confirmed{
+  border-color:var(--green);
 }
 
 .person-box .name{
@@ -256,11 +272,11 @@ th{
 
 .stat-grid{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(5,1fr);
   gap:10px;
 }
 
-@media(max-width:700px){
+@media(max-width:800px){
   .stat-grid{
     grid-template-columns:repeat(2,1fr);
   }
@@ -295,6 +311,18 @@ th{
   margin-bottom:12px;
 }
 
+.notice.green{
+  background:#16271d;
+  border-color:#285d3a;
+  color:#b8e8c7;
+}
+
+.notice.blue{
+  background:#162331;
+  border-color:#31536e;
+  color:#bddbfa;
+}
+
 .search{
   margin-bottom:12px;
 }
@@ -309,437 +337,373 @@ th{
   color:var(--blue);
   word-break:break-all;
 }
-</style>
-</head>
 
-<body>
+.evidence{
+  margin-top:8px;
+  padding:8px;
+  background:#171717;
+  border-left:3px solid var(--gold);
+  color:#bbb;
+  font-size:12px;
+}
 
-<header>
-  <h1>MI INVESTIGACIÓN GENEALÓGICA</h1>
+.family-line{
+  border-left:3px solid var(--gold);
+  padding-left:10px;
+  margin:10px 0;
+}
+
+.small{
+  font-size:12px;
+  color:#999;
+}
+
+hr{
+  border:0;
+  border-top:1px solid #333;
+  margin:18px 0;
+}
+</style></head><body><header>
+  <h1>ANTEPASADOS</h1>
   <small>Familia GALACHE · Investigación histórica</small>
-</header>
-
-<nav>
+</header><nav>
   <button class="tab active" data-tab="arbol">🌳 Árbol</button>
   <button class="tab" data-tab="personas">👤 Personas</button>
   <button class="tab" data-tab="investigacion">🔎 Investigación</button>
   <button class="tab" data-tab="fuentes">📜 Fuentes</button>
   <button class="tab" data-tab="copia">💾 Copia</button>
-</nav>
+</nav><main><section id="arbol" class="active">  <div class="card">
+    <h2>Árbol genealógico</h2><div class="notice blue">
+  Los datos aparecen diferenciados según el grado de evidencia.
+  <b>Confirmado</b> = existe documentación que lo demuestra.
+  <b>Probable</b> = existen coincidencias fuertes.
+  <b>Hipótesis</b> = relación pendiente de demostrar.
+</div>
 
-<main>
-
-<!-- =====================================================
-     ÁRBOL
-===================================================== -->
-
-<section id="arbol" class="active">
-
-  <div class="card">
-    <h2>Árbol genealógico</h2>
-
-    <div class="grid">
-      <div>
-        <label>Persona central</label>
-        <select id="treePerson"></select>
-      </div>
-
-      <div>
-        <label>Número de generaciones hacia arriba</label>
-        <select id="treeDepth">
-          <option value="1">1 generación</option>
-          <option value="2" selected>2 generaciones</option>
-          <option value="3">3 generaciones</option>
-          <option value="4">4 generaciones</option>
-          <option value="5">5 generaciones</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="action" onclick="drawTree()">Mostrar árbol</button>
-    </div>
+<div class="grid">
+  <div>
+    <label>Persona central</label>
+    <select id="treePerson"></select>
   </div>
 
-  <div id="treeContainer" class="card"></div>
+  <div>
+    <label>Generaciones hacia arriba</label>
+    <select id="treeDepth">
+      <option value="1">1 generación</option>
+      <option value="2" selected>2 generaciones</option>
+      <option value="3">3 generaciones</option>
+      <option value="4">4 generaciones</option>
+      <option value="5">5 generaciones</option>
+      <option value="6">6 generaciones</option>
+      <option value="7">7 generaciones</option>
+    </select>
+  </div>
+</div>
 
-</section>
+<div class="actions">
+  <button class="action" onclick="drawTree()">Mostrar árbol</button>
+</div>
 
+  </div>  <div id="treeContainer" class="card"></div></section><section id="personas">  <div class="card"><h2>Personas</h2>
 
-<!-- =====================================================
-     PERSONAS
-===================================================== -->
+<div class="search">
+  <input id="personSearch"
+         placeholder="Buscar por nombre, apellido, lugar..."
+         oninput="renderPeople()">
+</div>
 
-<section id="personas">
+<div class="actions">
+  <button class="action" onclick="newPerson()">➕ Nueva persona</button>
+</div>
 
-  <div class="card">
-    <h2>Personas</h2>
+  </div>  <div id="peopleList"></div></section><section id="personFormSection">  <div class="card"><h2 id="personFormTitle">Nueva persona</h2>
 
-    <div class="search">
-      <input id="personSearch"
-             placeholder="Buscar por nombre, apellido, lugar..."
-             oninput="renderPeople()">
-    </div>
+<input type="hidden" id="pId">
 
-    <div class="actions">
-      <button class="action" onclick="newPerson()">➕ Nueva persona</button>
-    </div>
+<div class="grid">
+
+  <div>
+    <label>Nombre</label>
+    <input id="pFirst">
   </div>
 
-  <div id="peopleList"></div>
-
-</section>
-
-
-<!-- =====================================================
-     FICHA PERSONA
-===================================================== -->
-
-<section id="personFormSection">
-
-  <div class="card">
-
-    <h2 id="personFormTitle">Nueva persona</h2>
-
-    <input type="hidden" id="pId">
-
-    <div class="grid">
-
-      <div>
-        <label>Nombre</label>
-        <input id="pFirst">
-      </div>
-
-      <div>
-        <label>Apellidos</label>
-        <input id="pLast">
-      </div>
-
-      <div>
-        <label>Variantes del nombre/apellido</label>
-        <input id="pVariants"
-               placeholder="Ej.: Airez, Aires, Airéz">
-      </div>
-
-      <div>
-        <label>Fecha de nacimiento</label>
-        <input id="pBirth" placeholder="dd/mm/aaaa">
-      </div>
-
-      <div>
-        <label>Lugar de nacimiento</label>
-        <input id="pBirthPlace">
-      </div>
-
-      <div>
-        <label>Parroquia de nacimiento</label>
-        <input id="pParish">
-      </div>
-
-      <div>
-        <label>Fecha de bautismo</label>
-        <input id="pBaptism" placeholder="dd/mm/aaaa">
-      </div>
-
-      <div>
-        <label>Lugar de bautismo</label>
-        <input id="pBaptismPlace">
-      </div>
-
-      <div>
-        <label>Fecha de matrimonio</label>
-        <input id="pMarriage" placeholder="dd/mm/aaaa">
-      </div>
-
-      <div>
-        <label>Lugar de matrimonio</label>
-        <input id="pMarriagePlace">
-      </div>
-
-      <div>
-        <label>Fecha de defunción</label>
-        <input id="pDeath" placeholder="dd/mm/aaaa">
-      </div>
-
-      <div>
-        <label>Lugar de defunción</label>
-        <input id="pDeathPlace">
-      </div>
-
-      <div>
-        <label>Profesión / oficio</label>
-        <input id="pJob">
-      </div>
-
-      <div>
-        <label>Residencia</label>
-        <input id="pResidence">
-      </div>
-
-      <div>
-        <label>Padre</label>
-        <select id="pFather"></select>
-      </div>
-
-      <div>
-        <label>Madre</label>
-        <select id="pMother"></select>
-      </div>
-
-      <div>
-        <label>Cónyuge</label>
-        <select id="pSpouse"></select>
-      </div>
-
-      <div>
-        <label>Grado de certeza</label>
-        <select id="pCertainty">
-          <option>Confirmado</option>
-          <option>Probable</option>
-          <option>Posible</option>
-          <option>Hipótesis</option>
-          <option>Pendiente</option>
-          <option>Desconocido</option>
-        </select>
-      </div>
-
-    </div>
-
-    <div style="margin-top:10px">
-      <label>Notas de investigación</label>
-      <textarea id="pNotes"
-        placeholder="Datos, dudas, coincidencias, contradicciones, observaciones..."></textarea>
-    </div>
-
-    <div class="actions">
-      <button class="action" onclick="savePerson()">💾 Guardar</button>
-      <button class="secondary" onclick="showTab('personas')">Cancelar</button>
-      <button class="danger" onclick="deleteCurrentPerson()">Eliminar</button>
-    </div>
-
+  <div>
+    <label>Apellidos</label>
+    <input id="pLast">
   </div>
 
-</section>
-
-
-<!-- =====================================================
-     INVESTIGACIÓN
-===================================================== -->
-
-<section id="investigacion">
-
-  <div class="card">
-
-    <h2>Diario de investigación</h2>
-
-    <div class="notice">
-      Aquí anotaremos tanto los hallazgos como las búsquedas que NO han dado resultado.
-      Esto es importante para no volver a investigar lo mismo y para distinguir hechos de hipótesis.
-    </div>
-
-    <div class="grid">
-
-      <div>
-        <label>Persona relacionada</label>
-        <select id="rPerson"></select>
-      </div>
-
-      <div>
-        <label>Fecha de la búsqueda</label>
-        <input id="rDate" type="date">
-      </div>
-
-      <div>
-        <label>Qué se buscó</label>
-        <input id="rQuery"
-               placeholder="Ej.: Bautismos de Pedro Galache">
-      </div>
-
-      <div>
-        <label>Lugar</label>
-        <input id="rPlace"
-               placeholder="Ej.: Villavieja de Yeltes">
-      </div>
-
-      <div>
-        <label>Años consultados</label>
-        <input id="rYears"
-               placeholder="1850-1861">
-      </div>
-
-      <div>
-        <label>Resultado</label>
-        <select id="rResult">
-          <option>Encontrado</option>
-          <option>No encontrado</option>
-          <option>Parcial</option>
-          <option>Pendiente</option>
-        </select>
-      </div>
-
-    </div>
-
-    <div style="margin-top:10px">
-      <label>Detalle</label>
-      <textarea id="rDetail"
-        placeholder="Qué hemos encontrado, qué páginas se revisaron, coincidencias, dudas, etc."></textarea>
-    </div>
-
-    <div class="actions">
-      <button class="action" onclick="saveResearch()">Guardar búsqueda</button>
-    </div>
-
+  <div>
+    <label>Variantes del nombre/apellido</label>
+    <input id="pVariants"
+           placeholder="Ej.: Airez, Aires, Airéz">
   </div>
 
-  <div id="researchList"></div>
-
-</section>
-
-
-<!-- =====================================================
-     FUENTES
-===================================================== -->
-
-<section id="fuentes">
-
-  <div class="card">
-
-    <h2>Fuentes documentales</h2>
-
-    <div class="grid">
-
-      <div>
-        <label>Persona</label>
-        <select id="sPerson"></select>
-      </div>
-
-      <div>
-        <label>Tipo de fuente</label>
-        <select id="sType">
-          <option>Partida bautismal</option>
-          <option>Partida matrimonial</option>
-          <option>Partida de defunción</option>
-          <option>Registro civil</option>
-          <option>Padrón / censo</option>
-          <option>FamilySearch</option>
-          <option>Archivo parroquial</option>
-          <option>Archivo municipal</option>
-          <option>Información familiar</option>
-          <option>Otra</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Fecha del documento</label>
-        <input id="sDate">
-      </div>
-
-      <div>
-        <label>Referencia / enlace</label>
-        <input id="sRef"
-               placeholder="Libro, folio, imagen, URL, etc.">
-      </div>
-
-    </div>
-
-    <div style="margin-top:10px">
-      <label>Descripción</label>
-      <textarea id="sDesc"
-        placeholder="Qué demuestra esta fuente y qué datos contiene"></textarea>
-    </div>
-
-    <div class="actions">
-      <button class="action" onclick="saveSource()">Guardar fuente</button>
-    </div>
-
+  <div>
+    <label>Fecha de nacimiento</label>
+    <input id="pBirth" placeholder="dd/mm/aaaa">
   </div>
 
-  <div id="sourcesList"></div>
-
-</section>
-
-
-<!-- =====================================================
-     COPIA
-===================================================== -->
-
-<section id="copia">
-
-  <div class="card">
-
-    <h2>Copia de seguridad</h2>
-
-    <div class="notice">
-      Guarda periódicamente una copia JSON. Así podrás recuperar toda la investigación
-      aunque se borren los datos del navegador.
-    </div>
-
-    <div class="actions">
-
-      <button class="action" onclick="exportJSON()">
-        ⬇️ Exportar investigación
-      </button>
-
-      <label class="secondary"
-             style="display:inline-block;cursor:pointer">
-        ⬆️ Importar investigación
-        <input type="file"
-               id="importFile"
-               accept=".json"
-               onchange="importJSON(event)"
-               style="display:none">
-      </label>
-
-      <button class="danger" onclick="deleteAll()">
-        ⚠️ Borrar todo
-      </button>
-
-    </div>
-
+  <div>
+    <label>Lugar de nacimiento</label>
+    <input id="pBirthPlace">
   </div>
 
-  <div class="card">
-
-    <h2>Resumen</h2>
-
-    <div class="stat-grid">
-
-      <div class="stat">
-        <span class="num" id="statPeople">0</span>
-        <span class="txt">Personas</span>
-      </div>
-
-      <div class="stat">
-        <span class="num" id="statSources">0</span>
-        <span class="txt">Fuentes</span>
-      </div>
-
-      <div class="stat">
-        <span class="num" id="statResearch">0</span>
-        <span class="txt">Búsquedas</span>
-      </div>
-
-      <div class="stat">
-        <span class="num" id="statHypotheses">0</span>
-        <span class="txt">Hipótesis</span>
-      </div>
-
-    </div>
-
+  <div>
+    <label>Parroquia de nacimiento</label>
+    <input id="pParish">
   </div>
 
-</section>
+  <div>
+    <label>Fecha de bautismo</label>
+    <input id="pBaptism" placeholder="dd/mm/aaaa">
+  </div>
 
-</main>
+  <div>
+    <label>Lugar de bautismo</label>
+    <input id="pBaptismPlace">
+  </div>
 
+  <div>
+    <label>Fecha de matrimonio</label>
+    <input id="pMarriage" placeholder="dd/mm/aaaa">
+  </div>
 
-<script>
+  <div>
+    <label>Lugar de matrimonio</label>
+    <input id="pMarriagePlace">
+  </div>
+
+  <div>
+    <label>Fecha de defunción</label>
+    <input id="pDeath" placeholder="dd/mm/aaaa">
+  </div>
+
+  <div>
+    <label>Lugar de defunción</label>
+    <input id="pDeathPlace">
+  </div>
+
+  <div>
+    <label>Profesión / oficio</label>
+    <input id="pJob">
+  </div>
+
+  <div>
+    <label>Residencia</label>
+    <input id="pResidence">
+  </div>
+
+  <div>
+    <label>Padre</label>
+    <select id="pFather"></select>
+  </div>
+
+  <div>
+    <label>Madre</label>
+    <select id="pMother"></select>
+  </div>
+
+  <div>
+    <label>Cónyuge</label>
+    <select id="pSpouse"></select>
+  </div>
+
+  <div>
+    <label>Grado de certeza</label>
+    <select id="pCertainty">
+      <option>Confirmado</option>
+      <option>Probable</option>
+      <option>Posible</option>
+      <option>Hipótesis</option>
+      <option>Pendiente</option>
+      <option>Desconocido</option>
+    </select>
+  </div>
+
+</div>
+
+<div style="margin-top:10px">
+  <label>Notas de investigación</label>
+  <textarea id="pNotes"
+    placeholder="Datos, dudas, coincidencias, contradicciones, observaciones..."></textarea>
+</div>
+
+<div class="actions">
+  <button class="action" onclick="savePerson()">💾 Guardar</button>
+  <button class="secondary" onclick="showTab('personas')">Cancelar</button>
+  <button class="danger" onclick="deleteCurrentPerson()">Eliminar</button>
+</div>
+
+  </div></section><section id="investigacion">  <div class="card"><h2>Diario de investigación</h2>
+
+<div class="notice">
+  Aquí quedan registrados tanto los hallazgos como las búsquedas que
+  <b>NO han dado resultado</b>. Así evitamos repetir investigaciones.
+</div>
+
+<div class="grid">
+
+  <div>
+    <label>Persona relacionada</label>
+    <select id="rPerson"></select>
+  </div>
+
+  <div>
+    <label>Fecha de la búsqueda</label>
+    <input id="rDate" type="date">
+  </div>
+
+  <div>
+    <label>Qué se buscó</label>
+    <input id="rQuery"
+           placeholder="Ej.: Bautismo de Pedro Galache">
+  </div>
+
+  <div>
+    <label>Lugar</label>
+    <input id="rPlace">
+  </div>
+
+  <div>
+    <label>Años consultados</label>
+    <input id="rYears">
+  </div>
+
+  <div>
+    <label>Resultado</label>
+    <select id="rResult">
+      <option>Encontrado</option>
+      <option>No encontrado</option>
+      <option>Parcial</option>
+      <option>Pendiente</option>
+    </select>
+  </div>
+
+</div>
+
+<div style="margin-top:10px">
+  <label>Detalle</label>
+  <textarea id="rDetail"></textarea>
+</div>
+
+<div class="actions">
+  <button class="action" onclick="saveResearch()">Guardar búsqueda</button>
+</div>
+
+  </div>  <div id="researchList"></div></section><section id="fuentes">  <div class="card"><h2>Fuentes documentales</h2>
+
+<div class="grid">
+
+  <div>
+    <label>Persona</label>
+    <select id="sPerson"></select>
+  </div>
+
+  <div>
+    <label>Tipo de fuente</label>
+    <select id="sType">
+      <option>Partida bautismal</option>
+      <option>Partida matrimonial</option>
+      <option>Partida de defunción</option>
+      <option>Registro civil</option>
+      <option>Padrón / censo</option>
+      <option>FamilySearch</option>
+      <option>Archivo parroquial</option>
+      <option>Archivo municipal</option>
+      <option>Información familiar</option>
+      <option>Otra</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Fecha del documento</label>
+    <input id="sDate">
+  </div>
+
+  <div>
+    <label>Referencia / enlace</label>
+    <input id="sRef">
+  </div>
+
+</div>
+
+<div style="margin-top:10px">
+  <label>Descripción</label>
+  <textarea id="sDesc"></textarea>
+</div>
+
+<div class="actions">
+  <button class="action" onclick="saveSource()">Guardar fuente</button>
+</div>
+
+  </div>  <div id="sourcesList"></div></section><section id="copia">  <div class="card"><h2>Copia de seguridad</h2>
+
+<div class="notice green">
+  La investigación se guarda automáticamente en el navegador.
+  Además, puedes exportar un archivo JSON para conservar una copia
+  independiente.
+</div>
+
+<div class="actions">
+
+  <button class="action" onclick="exportJSON()">
+    ⬇️ Exportar investigación
+  </button>
+
+  <label class="secondary"
+         style="display:inline-block;cursor:pointer">
+    ⬆️ Importar investigación
+    <input type="file"
+           id="importFile"
+           accept=".json"
+           onchange="importJSON(event)"
+           style="display:none">
+  </label>
+
+  <button class="danger" onclick="deleteAll()">
+    ⚠️ Borrar todo
+  </button>
+
+</div>
+
+  </div>  <div class="card"><h2>Resumen</h2>
+
+<div class="stat-grid">
+
+  <div class="stat">
+    <span class="num" id="statPeople">0</span>
+    <span class="txt">Personas</span>
+  </div>
+
+  <div class="stat">
+    <span class="num" id="statSources">0</span>
+    <span class="txt">Fuentes</span>
+  </div>
+
+  <div class="stat">
+    <span class="num" id="statResearch">0</span>
+    <span class="txt">Búsquedas</span>
+  </div>
+
+  <div class="stat">
+    <span class="num" id="statConfirmed">0</span>
+    <span class="txt">Confirmados</span>
+  </div>
+
+  <div class="stat">
+    <span class="num" id="statHypotheses">0</span>
+    <span class="txt">Hipótesis</span>
+  </div>
+
+</div>
+
+  </div></section></main><script>
 
 /* =====================================================
    BASE DE DATOS
 ===================================================== */
 
-const KEY = "galache_genealogia_v2";
+const KEY = "galache_genealogia_v3";
 
 let db = {
   people: [],
@@ -750,31 +714,78 @@ let db = {
 function loadDB(){
 
   try{
-    const raw = localStorage.getItem(KEY);
+
+    const raw =
+      localStorage.getItem(KEY);
 
     if(raw){
-      const data = JSON.parse(raw);
+
+      const data =
+        JSON.parse(raw);
 
       if(data && typeof data === "object"){
-        db.people = Array.isArray(data.people) ? data.people : [];
-        db.sources = Array.isArray(data.sources) ? data.sources : [];
-        db.research = Array.isArray(data.research) ? data.research : [];
+
+        db.people =
+          Array.isArray(data.people) ? data.people : [];
+
+        db.sources =
+          Array.isArray(data.sources) ? data.sources : [];
+
+        db.research =
+          Array.isArray(data.research) ? data.research : [];
+      }
+
+    }else{
+
+      /*
+        Compatibilidad con v2.
+        Si ya existía la aplicación anterior,
+        copiamos sus datos a v3 sin borrarlos.
+      */
+
+      const old =
+        localStorage.getItem("galache_genealogia_v2");
+
+      if(old){
+
+        const data =
+          JSON.parse(old);
+
+        if(data && typeof data === "object"){
+
+          db.people =
+            Array.isArray(data.people) ? data.people : [];
+
+          db.sources =
+            Array.isArray(data.sources) ? data.sources : [];
+
+          db.research =
+            Array.isArray(data.research) ? data.research : [];
+
+          saveDB();
+        }
       }
     }
 
   }catch(e){
-    console.error(e);
+
+    console.error("Error cargando base de datos",e);
+
   }
 }
 
 function saveDB(){
-  localStorage.setItem(KEY, JSON.stringify(db));
+
+  localStorage.setItem(
+    KEY,
+    JSON.stringify(db)
+  );
 }
 
 function uid(prefix){
+
   return prefix + "_" +
-    Date.now().toString(36) +
-    "_" +
+    Date.now().toString(36) + "_" +
     Math.random().toString(36).substring(2,8);
 }
 
@@ -785,41 +796,50 @@ function uid(prefix){
 
 document.querySelectorAll(".tab").forEach(btn => {
 
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click",() => {
+
     showTab(btn.dataset.tab);
+
   });
 
 });
 
 function showTab(tab){
 
-  document.querySelectorAll("section").forEach(s => {
-    s.classList.remove("active");
-  });
+  document.querySelectorAll("section")
+    .forEach(s => s.classList.remove("active"));
 
-  document.querySelectorAll("nav button").forEach(b => {
-    b.classList.remove("active");
-  });
+  document.querySelectorAll("nav button")
+    .forEach(b => b.classList.remove("active"));
 
-  const section = document.getElementById(tab);
+  const section =
+    document.getElementById(tab);
 
-  if(section){
+  if(section)
     section.classList.add("active");
-  }
 
-  const button = document.querySelector(
-    'nav button[data-tab="' + tab + '"]'
-  );
+  const button =
+    document.querySelector(
+      'nav button[data-tab="' + tab + '"]'
+    );
 
-  if(button){
+  if(button)
     button.classList.add("active");
-  }
 
-  if(tab === "personas") renderPeople();
-  if(tab === "arbol") refreshTreeSelectors();
-  if(tab === "investigacion") renderResearch();
-  if(tab === "fuentes") renderSources();
-  if(tab === "copia") updateStats();
+  if(tab === "personas")
+    renderPeople();
+
+  if(tab === "arbol")
+    refreshTreeSelectors();
+
+  if(tab === "investigacion")
+    renderResearch();
+
+  if(tab === "fuentes")
+    renderSources();
+
+  if(tab === "copia")
+    updateStats();
 }
 
 
@@ -829,9 +849,11 @@ function showTab(tab){
 
 function personName(p){
 
-  if(!p) return "Sin nombre";
+  if(!p)
+    return "Sin nombre";
 
-  const n = [p.first,p.last]
+  const n =
+    [p.first,p.last]
     .filter(Boolean)
     .join(" ")
     .trim();
@@ -840,38 +862,60 @@ function personName(p){
 }
 
 function getPerson(id){
-  return db.people.find(p => p.id === id);
+
+  if(!id)
+    return null;
+
+  return db.people.find(
+    p => p.id === id
+  );
 }
 
 function renderPeople(){
 
-  const box = document.getElementById("peopleList");
+  const box =
+    document.getElementById("peopleList");
 
-  const q = (
-    document.getElementById("personSearch")?.value || ""
-  ).toLowerCase().trim();
+  const q =
+    (document.getElementById("personSearch")?.value || "")
+    .toLowerCase()
+    .trim();
 
-  let people = db.people;
+  let people =
+    db.people.slice();
 
   if(q){
 
-    people = people.filter(p => {
+    people =
+      people.filter(p => {
 
-      const text = [
-        p.first,
-        p.last,
-        p.variants,
-        p.birthPlace,
-        p.baptismPlace,
-        p.marriagePlace,
-        p.deathPlace,
-        p.residence,
-        p.notes
-      ].join(" ").toLowerCase();
+        const text = [
 
-      return text.includes(q);
-    });
+          p.first,
+          p.last,
+          p.variants,
+          p.birth,
+          p.birthPlace,
+          p.baptismPlace,
+          p.marriagePlace,
+          p.deathPlace,
+          p.residence,
+          p.notes
+
+        ].join(" ").toLowerCase();
+
+        return text.includes(q);
+
+      });
+
   }
+
+  people.sort((a,b) =>
+    personName(a).localeCompare(
+      personName(b),
+      "es"
+    )
+  );
 
   if(!people.length){
 
@@ -881,49 +925,71 @@ function renderPeople(){
     return;
   }
 
-  box.innerHTML = people.map(p => {
+  box.innerHTML =
+    people.map(p => {
 
-    const father = getPerson(p.father);
-    const mother = getPerson(p.mother);
+      const father =
+        getPerson(p.father);
 
-    return `
-      <div class="person-row">
+      const mother =
+        getPerson(p.mother);
 
-        <strong>${esc(personName(p))}</strong>
+      const spouse =
+        getPerson(p.spouse);
 
-        <div class="meta">
-          ${p.birth ? "Nacimiento: " + esc(p.birth) : ""}
-          ${p.birthPlace ? " · " + esc(p.birthPlace) : ""}
+      return `
+
+        <div class="person-row">
+
+          <strong>
+            ${esc(personName(p))}
+          </strong>
+
+          <div class="meta">
+            ${p.birth ?
+              "Nacimiento: " + esc(p.birth) : ""}
+            ${p.birthPlace ?
+              " · " + esc(p.birthPlace) : ""}
+          </div>
+
+          <div class="meta">
+            Certeza:
+            <span class="badge ${certaintyClass(p.certainty)}">
+              ${esc(p.certainty || "Desconocido")}
+            </span>
+          </div>
+
+          <div class="meta">
+            ${father ?
+              "Padre: " + esc(personName(father)) : ""}
+            ${mother ?
+              " · Madre: " + esc(personName(mother)) : ""}
+          </div>
+
+          <div class="meta">
+            ${spouse ?
+              "Cónyuge: " + esc(personName(spouse)) : ""}
+          </div>
+
+          <div class="actions">
+
+            <button class="secondary"
+                    onclick="editPerson('${p.id}')">
+              Editar
+            </button>
+
+            <button class="secondary"
+                    onclick="showPersonTree('${p.id}')">
+              Ver árbol
+            </button>
+
+          </div>
+
         </div>
 
-        <div class="meta">
-          Certeza:
-          <span class="badge ${certaintyClass(p.certainty)}">
-            ${esc(p.certainty || "Desconocido")}
-          </span>
-        </div>
+      `;
 
-        <div class="meta">
-          ${father ? "Padre: " + esc(personName(father)) : ""}
-          ${mother ? " · Madre: " + esc(personName(mother)) : ""}
-        </div>
-
-        <div class="actions">
-          <button class="secondary"
-                  onclick="editPerson('${p.id}')">
-            Editar
-          </button>
-
-          <button class="secondary"
-                  onclick="showPersonTree('${p.id}')">
-            Ver árbol
-          </button>
-        </div>
-
-      </div>
-    `;
-
-  }).join("");
+    }).join("");
 }
 
 function certaintyClass(value){
@@ -937,25 +1003,35 @@ function certaintyClass(value){
 
 
 /* =====================================================
-   SELECTS DE PERSONAS
+   SELECTS
 ===================================================== */
 
-function fillPersonSelect(selectId, includeEmpty=true){
+function fillPersonSelect(
+  selectId,
+  includeEmpty=true
+){
 
-  const select = document.getElementById(selectId);
+  const select =
+    document.getElementById(selectId);
 
-  if(!select) return;
+  if(!select)
+    return;
 
-  const current = select.value;
+  const current =
+    select.value;
 
-  let html = includeEmpty
-    ? '<option value="">— Ninguno —</option>'
-    : "";
+  let html =
+    includeEmpty
+      ? '<option value="">— Ninguno —</option>'
+      : "";
 
   db.people
     .slice()
     .sort((a,b) =>
-      personName(a).localeCompare(personName(b),"es")
+      personName(a).localeCompare(
+        personName(b),
+        "es"
+      )
     )
     .forEach(p => {
 
@@ -964,13 +1040,13 @@ function fillPersonSelect(selectId, includeEmpty=true){
           ${esc(personName(p))}
         </option>
       `;
+
     });
 
   select.innerHTML = html;
 
-  if(db.people.some(p => p.id === current)){
+  if(db.people.some(p => p.id === current))
     select.value = current;
-  }
 }
 
 function refreshAllSelectors(){
@@ -987,59 +1063,86 @@ function refreshAllSelectors(){
 
 function refreshTreeSelectors(){
 
-  const select = document.getElementById("treePerson");
+  const select =
+    document.getElementById("treePerson");
 
-  if(!select) return;
+  if(!select)
+    return;
 
-  const current = select.value;
+  const current =
+    select.value;
 
   select.innerHTML =
     '<option value="">Selecciona una persona</option>' +
-    db.people.map(p => `
-      <option value="${p.id}">
-        ${esc(personName(p))}
-      </option>
-    `).join("");
 
-  if(db.people.some(p => p.id === current)){
+    db.people
+      .slice()
+      .sort((a,b) =>
+        personName(a).localeCompare(
+          personName(b),
+          "es"
+        )
+      )
+      .map(p => `
+        <option value="${p.id}">
+          ${esc(personName(p))}
+        </option>
+      `)
+      .join("");
+
+  if(db.people.some(p => p.id === current))
     select.value = current;
-  }
 }
 
 
 /* =====================================================
-   NUEVA PERSONA
+   FICHA PERSONA
 ===================================================== */
 
 function clearPersonForm(){
 
-  document.getElementById("pId").value = "";
-  document.getElementById("pFirst").value = "";
-  document.getElementById("pLast").value = "";
-  document.getElementById("pVariants").value = "";
-  document.getElementById("pBirth").value = "";
-  document.getElementById("pBirthPlace").value = "";
-  document.getElementById("pParish").value = "";
-  document.getElementById("pBaptism").value = "";
-  document.getElementById("pBaptismPlace").value = "";
-  document.getElementById("pMarriage").value = "";
-  document.getElementById("pMarriagePlace").value = "";
-  document.getElementById("pDeath").value = "";
-  document.getElementById("pDeathPlace").value = "";
-  document.getElementById("pJob").value = "";
-  document.getElementById("pResidence").value = "";
+  [
+    "pId",
+    "pFirst",
+    "pLast",
+    "pVariants",
+    "pBirth",
+    "pBirthPlace",
+    "pParish",
+    "pBaptism",
+    "pBaptismPlace",
+    "pMarriage",
+    "pMarriagePlace",
+    "pDeath",
+    "pDeathPlace",
+    "pJob",
+    "pResidence",
+    "pNotes"
+  ].forEach(id => {
+
+    const el =
+      document.getElementById(id);
+
+    if(el)
+      el.value = "";
+
+  });
+
   document.getElementById("pFather").value = "";
   document.getElementById("pMother").value = "";
   document.getElementById("pSpouse").value = "";
-  document.getElementById("pCertainty").value = "Pendiente";
-  document.getElementById("pNotes").value = "";
+
+  document.getElementById("pCertainty").value =
+    "Pendiente";
 }
 
 function newPerson(){
 
   clearPersonForm();
 
-  document.getElementById("personFormTitle").textContent =
+  document.getElementById(
+    "personFormTitle"
+  ).textContent =
     "Nueva persona";
 
   refreshAllSelectors();
@@ -1049,38 +1152,77 @@ function newPerson(){
 
 function editPerson(id){
 
-  const p = getPerson(id);
+  const p =
+    getPerson(id);
 
-  if(!p) return;
+  if(!p)
+    return;
 
-  document.getElementById("pId").value = p.id;
-  document.getElementById("pFirst").value = p.first || "";
-  document.getElementById("pLast").value = p.last || "";
-  document.getElementById("pVariants").value = p.variants || "";
-  document.getElementById("pBirth").value = p.birth || "";
-  document.getElementById("pBirthPlace").value = p.birthPlace || "";
-  document.getElementById("pParish").value = p.parish || "";
-  document.getElementById("pBaptism").value = p.baptism || "";
-  document.getElementById("pBaptismPlace").value = p.baptismPlace || "";
-  document.getElementById("pMarriage").value = p.marriage || "";
-  document.getElementById("pMarriagePlace").value = p.marriagePlace || "";
-  document.getElementById("pDeath").value = p.death || "";
-  document.getElementById("pDeathPlace").value = p.deathPlace || "";
-  document.getElementById("pJob").value = p.job || "";
-  document.getElementById("pResidence").value = p.residence || "";
+  document.getElementById("pId").value =
+    p.id;
+
+  document.getElementById("pFirst").value =
+    p.first || "";
+
+  document.getElementById("pLast").value =
+    p.last || "";
+
+  document.getElementById("pVariants").value =
+    p.variants || "";
+
+  document.getElementById("pBirth").value =
+    p.birth || "";
+
+  document.getElementById("pBirthPlace").value =
+    p.birthPlace || "";
+
+  document.getElementById("pParish").value =
+    p.parish || "";
+
+  document.getElementById("pBaptism").value =
+    p.baptism || "";
+
+  document.getElementById("pBaptismPlace").value =
+    p.baptismPlace || "";
+
+  document.getElementById("pMarriage").value =
+    p.marriage || "";
+
+  document.getElementById("pMarriagePlace").value =
+    p.marriagePlace || "";
+
+  document.getElementById("pDeath").value =
+    p.death || "";
+
+  document.getElementById("pDeathPlace").value =
+    p.deathPlace || "";
+
+  document.getElementById("pJob").value =
+    p.job || "";
+
+  document.getElementById("pResidence").value =
+    p.residence || "";
 
   refreshAllSelectors();
 
-  document.getElementById("pFather").value = p.father || "";
-  document.getElementById("pMother").value = p.mother || "";
-  document.getElementById("pSpouse").value = p.spouse || "";
+  document.getElementById("pFather").value =
+    p.father || "";
+
+  document.getElementById("pMother").value =
+    p.mother || "";
+
+  document.getElementById("pSpouse").value =
+    p.spouse || "";
 
   document.getElementById("pCertainty").value =
     p.certainty || "Pendiente";
 
-  document.getElementById("pNotes").value = p.notes || "";
+  document.getElementById("pNotes").value =
+    p.notes || "";
 
-  document.getElementById("personFormTitle").textContent =
+  document.getElementById(
+    "personFormTitle"
+  ).textContent =
     "Editar: " + personName(p);
 
   showTab("personFormSection");
@@ -1089,9 +1231,11 @@ function editPerson(id){
 function savePerson(){
 
   const id =
-    document.getElementById("pId").value || uid("P");
+    document.getElementById("pId").value ||
+    uid("P");
 
-  const existing = getPerson(id);
+  const existing =
+    getPerson(id);
 
   const person = {
 
@@ -1153,7 +1297,6 @@ function savePerson(){
 
     notes:
       document.getElementById("pNotes").value.trim()
-
   };
 
   if(existing){
@@ -1163,14 +1306,27 @@ function savePerson(){
   }else{
 
     db.people.push(person);
+
+  }
+
+  /*
+    Si se asigna cónyuge, intentamos mantener
+    la relación también en la otra persona.
+  */
+
+  if(person.spouse){
+
+    const spouse =
+      getPerson(person.spouse);
+
+    if(spouse && !spouse.spouse)
+      spouse.spouse = person.id;
   }
 
   saveDB();
 
   refreshAllSelectors();
-
   renderPeople();
-
   updateStats();
 
   alert("Persona guardada.");
@@ -1180,34 +1336,52 @@ function savePerson(){
 
 function deleteCurrentPerson(){
 
-  const id = document.getElementById("pId").value;
+  const id =
+    document.getElementById("pId").value;
 
-  if(!id) return;
+  if(!id)
+    return;
 
-  const p = getPerson(id);
+  const p =
+    getPerson(id);
 
-  if(!p) return;
+  if(!p)
+    return;
 
   if(!confirm(
-    "¿Eliminar a " + personName(p) + "?"
-  )) return;
+    "¿Eliminar a " +
+    personName(p) +
+    "?"
+  ))
+    return;
 
   db.people =
-    db.people.filter(x => x.id !== id);
+    db.people.filter(
+      x => x.id !== id
+    );
 
   db.people.forEach(x => {
 
-    if(x.father === id) x.father = "";
-    if(x.mother === id) x.mother = "";
-    if(x.spouse === id) x.spouse = "";
+    if(x.father === id)
+      x.father = "";
+
+    if(x.mother === id)
+      x.mother = "";
+
+    if(x.spouse === id)
+      x.spouse = "";
 
   });
 
   db.sources =
-    db.sources.filter(x => x.person !== id);
+    db.sources.filter(
+      x => x.person !== id
+    );
 
   db.research =
-    db.research.filter(x => x.person !== id);
+    db.research.filter(
+      x => x.person !== id
+    );
 
   saveDB();
 
@@ -1225,11 +1399,11 @@ function deleteCurrentPerson(){
 
 function showPersonTree(id){
 
-  const select = document.getElementById("treePerson");
-
   refreshTreeSelectors();
 
-  select.value = id;
+  document.getElementById(
+    "treePerson"
+  ).value = id;
 
   showTab("arbol");
 
@@ -1239,13 +1413,21 @@ function showPersonTree(id){
 function drawTree(){
 
   const id =
-    document.getElementById("treePerson").value;
+    document.getElementById(
+      "treePerson"
+    ).value;
 
   const depth =
-    Number(document.getElementById("treeDepth").value);
+    Number(
+      document.getElementById(
+        "treeDepth"
+      ).value
+    );
 
   const container =
-    document.getElementById("treeContainer");
+    document.getElementById(
+      "treeContainer"
+    );
 
   if(!id){
 
@@ -1255,7 +1437,8 @@ function drawTree(){
     return;
   }
 
-  const person = getPerson(id);
+  const person =
+    getPerson(id);
 
   if(!person){
 
@@ -1277,15 +1460,22 @@ function drawTree(){
 
     current.forEach(p => {
 
-      const father = getPerson(p.father);
-      const mother = getPerson(p.mother);
+      const father =
+        getPerson(p.father);
 
-      if(father) next.push(father);
-      if(mother) next.push(mother);
+      const mother =
+        getPerson(p.mother);
+
+      if(father)
+        next.push(father);
+
+      if(mother)
+        next.push(mother);
 
     });
 
-    if(!next.length) break;
+    if(!next.length)
+      break;
 
     generations.push(next);
 
@@ -1293,33 +1483,53 @@ function drawTree(){
   }
 
   let html = `
-    <h2>Ascendencia de ${esc(personName(person))}</h2>
+
+    <h2>
+      Ascendencia de
+      ${esc(personName(person))}
+    </h2>
+
     <div class="tree">
   `;
 
-  for(let i=generations.length-1;i>=0;i--){
+  for(
+    let i=generations.length-1;
+    i>=0;
+    i--
+  ){
 
     html += `
+
       <div class="tree-level">
-        ${generations[i].map((p,index) =>
-          personBox(p,p.id === id)
-        ).join("")}
+
+        ${generations[i]
+          .map(p =>
+            personBox(
+              p,
+              p.id === id
+            )
+          )
+          .join("")}
+
       </div>
+
     `;
 
-    if(i > 0){
-      html += `<div class="tree-arrow">↓</div>`;
-    }
+    if(i > 0)
+      html +=
+        '<div class="tree-arrow">↓</div>';
   }
 
   html += `
+
     </div>
 
-    <hr style="border-color:#333">
+    <hr>
 
     <h3>Información de la persona central</h3>
 
     ${personDetails(person)}
+
   `;
 
   container.innerHTML = html;
@@ -1328,30 +1538,57 @@ function drawTree(){
 function personBox(p,main=false){
 
   return `
-    <div class="person-box ${main ? "main" : ""}">
-      <div class="name">${esc(personName(p))}</div>
+
+    <div class="person-box
+      ${main ? "main" : ""}
+      ${certaintyClass(p.certainty)}">
+
+      <div class="name">
+        ${esc(personName(p))}
+      </div>
 
       <div class="date">
-        ${p.birth ? "n. " + esc(p.birth) : ""}
-        ${p.birthPlace ? " · " + esc(p.birthPlace) : ""}
+
+        ${p.birth ?
+          "n. " + esc(p.birth) : ""}
+
+        ${p.birthPlace ?
+          " · " + esc(p.birthPlace) : ""}
+
       </div>
 
       <div style="margin-top:7px">
-        <span class="badge ${certaintyClass(p.certainty)}">
-          ${esc(p.certainty || "Desconocido")}
+
+        <span class="badge
+          ${certaintyClass(p.certainty)}">
+
+          ${esc(
+            p.certainty ||
+            "Desconocido"
+          )}
+
         </span>
+
       </div>
+
     </div>
+
   `;
 }
 
 function personDetails(p){
 
-  const father = getPerson(p.father);
-  const mother = getPerson(p.mother);
-  const spouse = getPerson(p.spouse);
+  const father =
+    getPerson(p.father);
+
+  const mother =
+    getPerson(p.mother);
+
+  const spouse =
+    getPerson(p.spouse);
 
   return `
+
     <table>
 
       <tr>
@@ -1368,7 +1605,8 @@ function personDetails(p){
         <th>Nacimiento</th>
         <td>
           ${esc(p.birth || "—")}
-          ${p.birthPlace ? " · " + esc(p.birthPlace) : ""}
+          ${p.birthPlace ?
+            " · " + esc(p.birthPlace) : ""}
         </td>
       </tr>
 
@@ -1376,7 +1614,8 @@ function personDetails(p){
         <th>Bautismo</th>
         <td>
           ${esc(p.baptism || "—")}
-          ${p.baptismPlace ? " · " + esc(p.baptismPlace) : ""}
+          ${p.baptismPlace ?
+            " · " + esc(p.baptismPlace) : ""}
         </td>
       </tr>
 
@@ -1384,7 +1623,8 @@ function personDetails(p){
         <th>Matrimonio</th>
         <td>
           ${esc(p.marriage || "—")}
-          ${p.marriagePlace ? " · " + esc(p.marriagePlace) : ""}
+          ${p.marriagePlace ?
+            " · " + esc(p.marriagePlace) : ""}
         </td>
       </tr>
 
@@ -1392,37 +1632,55 @@ function personDetails(p){
         <th>Defunción</th>
         <td>
           ${esc(p.death || "—")}
-          ${p.deathPlace ? " · " + esc(p.deathPlace) : ""}
+          ${p.deathPlace ?
+            " · " + esc(p.deathPlace) : ""}
         </td>
       </tr>
 
       <tr>
         <th>Padre</th>
-        <td>${father ? esc(personName(father)) : "—"}</td>
+        <td>
+          ${father ?
+            esc(personName(father)) : "—"}
+        </td>
       </tr>
 
       <tr>
         <th>Madre</th>
-        <td>${mother ? esc(personName(mother)) : "—"}</td>
+        <td>
+          ${mother ?
+            esc(personName(mother)) : "—"}
+        </td>
       </tr>
 
       <tr>
         <th>Cónyuge</th>
-        <td>${spouse ? esc(personName(spouse)) : "—"}</td>
+        <td>
+          ${spouse ?
+            esc(personName(spouse)) : "—"}
+        </td>
       </tr>
 
       <tr>
         <th>Certeza</th>
         <td>
-          <span class="badge ${certaintyClass(p.certainty)}">
-            ${esc(p.certainty || "Desconocido")}
+          <span class="badge
+            ${certaintyClass(p.certainty)}">
+            ${esc(
+              p.certainty ||
+              "Desconocido"
+            )}
           </span>
         </td>
       </tr>
 
       <tr>
         <th>Notas</th>
-        <td>${esc(p.notes || "—").replace(/\n/g,"<br>")}</td>
+        <td>
+          ${esc(
+            p.notes || "—"
+          ).replace(/\n/g,"<br>")}
+        </td>
       </tr>
 
     </table>
@@ -1441,26 +1699,42 @@ function saveResearch(){
     id:uid("R"),
 
     person:
-      document.getElementById("rPerson").value,
+      document.getElementById(
+        "rPerson"
+      ).value,
 
     date:
-      document.getElementById("rDate").value ||
-      new Date().toISOString().slice(0,10),
+      document.getElementById(
+        "rDate"
+      ).value ||
+      new Date()
+        .toISOString()
+        .slice(0,10),
 
     query:
-      document.getElementById("rQuery").value.trim(),
+      document.getElementById(
+        "rQuery"
+      ).value.trim(),
 
     place:
-      document.getElementById("rPlace").value.trim(),
+      document.getElementById(
+        "rPlace"
+      ).value.trim(),
 
     years:
-      document.getElementById("rYears").value.trim(),
+      document.getElementById(
+        "rYears"
+      ).value.trim(),
 
     result:
-      document.getElementById("rResult").value,
+      document.getElementById(
+        "rResult"
+      ).value,
 
     detail:
-      document.getElementById("rDetail").value.trim()
+      document.getElementById(
+        "rDetail"
+      ).value.trim()
 
   };
 
@@ -1468,10 +1742,10 @@ function saveResearch(){
 
   saveDB();
 
-  document.getElementById("rQuery").value = "";
-  document.getElementById("rPlace").value = "";
-  document.getElementById("rYears").value = "";
-  document.getElementById("rDetail").value = "";
+  document.getElementById("rQuery").value="";
+  document.getElementById("rPlace").value="";
+  document.getElementById("rYears").value="";
+  document.getElementById("rDetail").value="";
 
   renderResearch();
   updateStats();
@@ -1482,7 +1756,9 @@ function saveResearch(){
 function renderResearch(){
 
   const box =
-    document.getElementById("researchList");
+    document.getElementById(
+      "researchList"
+    );
 
   if(!db.research.length){
 
@@ -1492,72 +1768,96 @@ function renderResearch(){
     return;
   }
 
-  box.innerHTML = db.research.map(r => {
+  box.innerHTML =
+    db.research.map(r => {
 
-    const p = getPerson(r.person);
+      const p =
+        getPerson(r.person);
 
-    return `
-      <div class="card">
+      return `
 
-        <h3>${esc(r.query || "Búsqueda sin título")}</h3>
+        <div class="card">
 
-        <table>
+          <h3>
+            ${esc(
+              r.query ||
+              "Búsqueda sin título"
+            )}
+          </h3>
 
-          <tr>
-            <th>Persona</th>
-            <td>${p ? esc(personName(p)) : "—"}</td>
-          </tr>
+          <table>
 
-          <tr>
-            <th>Fecha</th>
-            <td>${esc(r.date || "—")}</td>
-          </tr>
+            <tr>
+              <th>Persona</th>
+              <td>
+                ${p ?
+                  esc(personName(p)) :
+                  "—"}
+              </td>
+            </tr>
 
-          <tr>
-            <th>Lugar</th>
-            <td>${esc(r.place || "—")}</td>
-          </tr>
+            <tr>
+              <th>Fecha</th>
+              <td>${esc(r.date || "—")}</td>
+            </tr>
 
-          <tr>
-            <th>Años</th>
-            <td>${esc(r.years || "—")}</td>
-          </tr>
+            <tr>
+              <th>Lugar</th>
+              <td>${esc(r.place || "—")}</td>
+            </tr>
 
-          <tr>
-            <th>Resultado</th>
-            <td>
-              <span class="badge">
-                ${esc(r.result)}
-              </span>
-            </td>
-          </tr>
+            <tr>
+              <th>Años</th>
+              <td>${esc(r.years || "—")}</td>
+            </tr>
 
-          <tr>
-            <th>Detalle</th>
-            <td>${esc(r.detail || "—").replace(/\n/g,"<br>")}</td>
-          </tr>
+            <tr>
+              <th>Resultado</th>
+              <td>
+                <span class="badge">
+                  ${esc(r.result)}
+                </span>
+              </td>
+            </tr>
 
-        </table>
+            <tr>
+              <th>Detalle</th>
+              <td>
+                ${esc(
+                  r.detail || "—"
+                ).replace(/\n/g,"<br>")}
+              </td>
+            </tr>
 
-        <div class="actions">
-          <button class="danger"
-                  onclick="deleteResearch('${r.id}')">
-            Eliminar
-          </button>
+          </table>
+
+          <div class="actions">
+
+            <button class="danger"
+                    onclick="deleteResearch('${r.id}')">
+              Eliminar
+            </button>
+
+          </div>
+
         </div>
 
-      </div>
-    `;
+      `;
 
-  }).join("");
+    }).join("");
 }
 
 function deleteResearch(id){
 
-  if(!confirm("¿Eliminar esta búsqueda?")) return;
+  if(!confirm(
+    "¿Eliminar esta búsqueda?"
+  ))
+    return;
 
   db.research =
-    db.research.filter(r => r.id !== id);
+    db.research.filter(
+      r => r.id !== id
+    );
 
   saveDB();
 
@@ -1577,19 +1877,29 @@ function saveSource(){
     id:uid("S"),
 
     person:
-      document.getElementById("sPerson").value,
+      document.getElementById(
+        "sPerson"
+      ).value,
 
     type:
-      document.getElementById("sType").value,
+      document.getElementById(
+        "sType"
+      ).value,
 
     date:
-      document.getElementById("sDate").value.trim(),
+      document.getElementById(
+        "sDate"
+      ).value.trim(),
 
     ref:
-      document.getElementById("sRef").value.trim(),
+      document.getElementById(
+        "sRef"
+      ).value.trim(),
 
     desc:
-      document.getElementById("sDesc").value.trim()
+      document.getElementById(
+        "sDesc"
+      ).value.trim()
 
   };
 
@@ -1597,9 +1907,9 @@ function saveSource(){
 
   saveDB();
 
-  document.getElementById("sDate").value = "";
-  document.getElementById("sRef").value = "";
-  document.getElementById("sDesc").value = "";
+  document.getElementById("sDate").value="";
+  document.getElementById("sRef").value="";
+  document.getElementById("sDesc").value="";
 
   renderSources();
   updateStats();
@@ -1610,7 +1920,9 @@ function saveSource(){
 function renderSources(){
 
   const box =
-    document.getElementById("sourcesList");
+    document.getElementById(
+      "sourcesList"
+    );
 
   if(!db.sources.length){
 
@@ -1620,74 +1932,98 @@ function renderSources(){
     return;
   }
 
-  box.innerHTML = db.sources.map(s => {
+  box.innerHTML =
+    db.sources.map(s => {
 
-    const p = getPerson(s.person);
+      const p =
+        getPerson(s.person);
 
-    const ref = s.ref || "";
+      const ref =
+        s.ref || "";
 
-    let refHtml = esc(ref);
+      let refHtml =
+        esc(ref);
 
-    if(/^https?:\/\//i.test(ref)){
+      if(/^https?:\/\//i.test(ref)){
 
-      refHtml = `
-        <a class="source-link"
-           href="${escAttr(ref)}"
-           target="_blank"
-           rel="noopener">
-          ${esc(ref)}
-        </a>
-      `;
-    }
+        refHtml = `
 
-    return `
-      <div class="card">
+          <a class="source-link"
+             href="${escAttr(ref)}"
+             target="_blank"
+             rel="noopener">
 
-        <h3>${esc(s.type)}</h3>
+            ${esc(ref)}
 
-        <table>
+          </a>
+        `;
+      }
 
-          <tr>
-            <th>Persona</th>
-            <td>${p ? esc(personName(p)) : "—"}</td>
-          </tr>
+      return `
 
-          <tr>
-            <th>Fecha</th>
-            <td>${esc(s.date || "—")}</td>
-          </tr>
+        <div class="card">
 
-          <tr>
-            <th>Referencia</th>
-            <td>${refHtml || "—"}</td>
-          </tr>
+          <h3>${esc(s.type)}</h3>
 
-          <tr>
-            <th>Descripción</th>
-            <td>${esc(s.desc || "—").replace(/\n/g,"<br>")}</td>
-          </tr>
+          <table>
 
-        </table>
+            <tr>
+              <th>Persona</th>
+              <td>
+                ${p ?
+                  esc(personName(p)) :
+                  "—"}
+              </td>
+            </tr>
 
-        <div class="actions">
-          <button class="danger"
-                  onclick="deleteSource('${s.id}')">
-            Eliminar
-          </button>
+            <tr>
+              <th>Fecha</th>
+              <td>${esc(s.date || "—")}</td>
+            </tr>
+
+            <tr>
+              <th>Referencia</th>
+              <td>${refHtml || "—"}</td>
+            </tr>
+
+            <tr>
+              <th>Descripción</th>
+              <td>
+                ${esc(
+                  s.desc || "—"
+                ).replace(/\n/g,"<br>")}
+              </td>
+            </tr>
+
+          </table>
+
+          <div class="actions">
+
+            <button class="danger"
+                    onclick="deleteSource('${s.id}')">
+              Eliminar
+            </button>
+
+          </div>
+
         </div>
 
-      </div>
-    `;
+      `;
 
-  }).join("");
+    }).join("");
 }
 
 function deleteSource(id){
 
-  if(!confirm("¿Eliminar esta fuente?")) return;
+  if(!confirm(
+    "¿Eliminar esta fuente?"
+  ))
+    return;
 
   db.sources =
-    db.sources.filter(s => s.id !== id);
+    db.sources.filter(
+      s => s.id !== id
+    );
 
   saveDB();
 
@@ -1697,15 +2033,23 @@ function deleteSource(id){
 
 
 /* =====================================================
-   COPIA JSON
+   COPIA
 ===================================================== */
 
 function exportJSON(){
 
-  const data = JSON.stringify(db,null,2);
+  const data =
+    JSON.stringify(
+      db,
+      null,
+      2
+    );
 
   const blob =
-    new Blob([data],{type:"application/json"});
+    new Blob(
+      [data],
+      {type:"application/json"}
+    );
 
   const url =
     URL.createObjectURL(blob);
@@ -1714,12 +2058,16 @@ function exportJSON(){
     document.createElement("a");
 
   const fecha =
-    new Date().toISOString().slice(0,10);
+    new Date()
+      .toISOString()
+      .slice(0,10);
 
   a.href = url;
 
   a.download =
-    "GALACHE_genealogia_" + fecha + ".json";
+    "ANTEPASADOS_GALACHE_" +
+    fecha +
+    ".json";
 
   document.body.appendChild(a);
 
@@ -1735,58 +2083,73 @@ function importJSON(event){
   const file =
     event.target.files[0];
 
-  if(!file) return;
+  if(!file)
+    return;
 
   const reader =
     new FileReader();
 
-  reader.onload = function(){
+  reader.onload =
+    function(){
 
-    try{
+      try{
 
-      const data =
-        JSON.parse(reader.result);
+        const data =
+          JSON.parse(
+            reader.result
+          );
 
-      if(
-        !data ||
-        !Array.isArray(data.people) ||
-        !Array.isArray(data.sources) ||
-        !Array.isArray(data.research)
-      ){
-        throw new Error("Formato incorrecto");
+        if(
+          !data ||
+          !Array.isArray(data.people) ||
+          !Array.isArray(data.sources) ||
+          !Array.isArray(data.research)
+        ){
+
+          throw new Error(
+            "Formato incorrecto"
+          );
+        }
+
+        if(!confirm(
+          "La importación sustituirá los datos actuales. ¿Continuar?"
+        ))
+          return;
+
+        db = {
+
+          people:data.people,
+          sources:data.sources,
+          research:data.research
+
+        };
+
+        saveDB();
+
+        refreshAllSelectors();
+        renderPeople();
+        renderResearch();
+        renderSources();
+        updateStats();
+
+        alert(
+          "Investigación importada correctamente."
+        );
+
+      }catch(e){
+
+        alert(
+          "No se pudo importar el archivo.\n" +
+          e.message
+        );
+
       }
 
-      if(!confirm(
-        "La importación sustituirá los datos actuales. ¿Continuar?"
-      )){
-        return;
-      }
-
-      db = data;
-
-      saveDB();
-
-      refreshAllSelectors();
-      renderPeople();
-      renderResearch();
-      renderSources();
-      updateStats();
-
-      alert("Investigación importada correctamente.");
-
-    }catch(e){
-
-      alert(
-        "No se pudo importar el archivo.\n" +
-        e.message
-      );
-    }
-
-  };
+    };
 
   reader.readAsText(file);
 
-  event.target.value = "";
+  event.target.value="";
 }
 
 function deleteAll(){
@@ -1795,12 +2158,14 @@ function deleteAll(){
     "ATENCIÓN\n\n" +
     "Se borrarán todas las personas, fuentes y búsquedas.\n\n" +
     "¿Estás seguro?"
-  )) return;
+  ))
+    return;
 
   if(!confirm(
     "Última confirmación.\n\n" +
     "¿BORRAR TODO?"
-  )) return;
+  ))
+    return;
 
   db = {
     people:[],
@@ -1816,7 +2181,9 @@ function deleteAll(){
   renderSources();
   updateStats();
 
-  alert("Todos los datos han sido eliminados.");
+  alert(
+    "Todos los datos han sido eliminados."
+  );
 }
 
 
@@ -1827,33 +2194,53 @@ function deleteAll(){
 function updateStats(){
 
   const people =
-    document.getElementById("statPeople");
+    document.getElementById(
+      "statPeople"
+    );
 
   const sources =
-    document.getElementById("statSources");
+    document.getElementById(
+      "statSources"
+    );
 
   const research =
-    document.getElementById("statResearch");
+    document.getElementById(
+      "statResearch"
+    );
+
+  const confirmed =
+    document.getElementById(
+      "statConfirmed"
+    );
 
   const hypotheses =
-    document.getElementById("statHypotheses");
+    document.getElementById(
+      "statHypotheses"
+    );
 
   if(people)
-    people.textContent = db.people.length;
+    people.textContent =
+      db.people.length;
 
   if(sources)
-    sources.textContent = db.sources.length;
+    sources.textContent =
+      db.sources.length;
 
   if(research)
-    research.textContent = db.research.length;
+    research.textContent =
+      db.research.length;
 
-  if(hypotheses){
-
-    hypotheses.textContent =
-      db.people.filter(p =>
-        p.certainty === "Hipótesis"
+  if(confirmed)
+    confirmed.textContent =
+      db.people.filter(
+        p => p.certainty === "Confirmado"
       ).length;
-  }
+
+  if(hypotheses)
+    hypotheses.textContent =
+      db.people.filter(
+        p => p.certainty === "Hipótesis"
+      ).length;
 }
 
 
@@ -1878,163 +2265,1127 @@ function escAttr(value){
 
 
 /* =====================================================
-   DATOS INICIALES GALACHE
-   SOLO COMO PUNTOS DE PARTIDA.
-   NO SE MARCAN COMO CONFIRMADOS.
+   DATOS GALACHE
+   Se añaden solamente si no existen.
 ===================================================== */
+
+function findExistingPerson(first,last){
+
+  const f =
+    String(first)
+      .toLowerCase()
+      .trim();
+
+  const l =
+    String(last)
+      .toLowerCase()
+      .trim();
+
+  return db.people.find(p =>
+    String(p.first || "")
+      .toLowerCase()
+      .trim() === f &&
+    String(p.last || "")
+      .toLowerCase()
+      .trim() === l
+  );
+}
+
+function addPerson(data){
+
+  let p =
+    findExistingPerson(
+      data.first,
+      data.last
+    );
+
+  if(p){
+
+    Object.assign(
+      p,
+      data,
+      {id:p.id}
+    );
+
+    return p;
+  }
+
+  p = {
+    id:uid("P"),
+    ...data
+  };
+
+  db.people.push(p);
+
+  return p;
+}
+
+function addSource(data){
+
+  const exists =
+    db.sources.some(s =>
+      s.type === data.type &&
+      s.date === data.date &&
+      s.ref === data.ref &&
+      s.desc === data.desc
+    );
+
+  if(exists)
+    return;
+
+  db.sources.unshift({
+    id:uid("S"),
+    ...data
+  });
+}
+
+function addResearch(data){
+
+  const exists =
+    db.research.some(r =>
+      r.query === data.query &&
+      r.place === data.place &&
+      r.years === data.years &&
+      r.detail === data.detail
+    );
+
+  if(exists)
+    return;
+
+  db.research.unshift({
+    id:uid("R"),
+    ...data
+  });
+}
 
 function seedGalache(){
 
-  if(db.people.length) return;
-
-  const pedroRomero = {
-    id:uid("P"),
-    first:"Pedro",
-    last:"Galache Romero",
-    variants:"",
-    birth:"29/06/1897",
-    birthPlace:"Genalguacil",
-    parish:"",
-    baptism:"",
-    baptismPlace:"Genalguacil",
-    marriage:"",
-    marriagePlace:"",
-    death:"",
-    deathPlace:"",
-    job:"",
-    residence:"",
-    father:"",
-    mother:"",
-    spouse:"",
-    certainty:"Confirmado",
-    notes:
-      "Punto de partida de la investigación. " +
-      "Fecha y lugar de nacimiento: Genalguacil, 29/06/1897."
-  };
-
-  const pedroAirez = {
-    id:uid("P"),
-    first:"Pedro",
-    last:"Galache Airez",
-    variants:"Airez / Aires / Airéz",
-    birth:"1856",
-    birthPlace:"Villavieja de Yeltes",
-    parish:"",
-    baptism:"",
-    baptismPlace:"Villavieja de Yeltes",
-    marriage:"",
-    marriagePlace:"",
-    death:"",
-    deathPlace:"",
-    job:"",
-    residence:"",
-    father:"",
-    mother:"",
-    spouse:"",
-    certainty:"Probable",
-    notes:
-      "Existe una partida bautismal de Villavieja de Yeltes " +
-      "de 1856 que coincide en nombre, padres y lugar con la " +
-      "información de Genalguacil. El apellido Airez podría estar " +
-      "mal transcrito o presentar una variante. La relación con " +
-      "Pedro Galache Romero debe documentarse."
-  };
-
-  const celestino = {
-    id:uid("P"),
-    first:"Celestino",
-    last:"Galache",
-    variants:"",
-    birth:"",
-    birthPlace:"",
-    parish:"",
-    baptism:"",
-    baptismPlace:"",
-    marriage:"",
-    marriagePlace:"",
-    death:"",
-    deathPlace:"",
-    father:"",
-    mother:"",
-    spouse:"",
-    job:"",
-    residence:"",
-    certainty:"Pendiente",
-    notes:
-      "Generación anterior según la línea familiar aportada. " +
-      "Pendiente localizar documentación."
-  };
-
-  const santiago = {
-    id:uid("P"),
-    first:"Santiago",
-    last:"Galache",
-    variants:"",
-    birth:"",
-    birthPlace:"",
-    parish:"",
-    baptism:"",
-    baptismPlace:"",
-    marriage:"",
-    marriagePlace:"",
-    death:"",
-    deathPlace:"",
-    father:"",
-    mother:"",
-    spouse:"",
-    job:"",
-    residence:"",
-    certainty:"Pendiente",
-    notes:
-      "Generación anterior según la línea familiar aportada. " +
-      "Pendiente localizar documentación."
-  };
-
   /*
-    Relación inicial:
-
-    Santiago
-       ↓
-    Celestino
-       ↓
-    Pedro Galache Airez
-       ↓
-    Pedro Galache Romero
-
-    IMPORTANTE:
-    Las relaciones se dejan registradas como hipótesis
-    mediante las notas y no se presentan como hechos
-    documentalmente confirmados.
+    -------------------------------------------------
+    GENERACIÓN ACTUAL
+    -------------------------------------------------
   */
 
-  pedroRomero.father = pedroAirez.id;
-  pedroRomero.certainty = "Probable";
+  const pedroRomero =
+    addPerson({
 
-  pedroRomero.notes +=
-    " Relación padre/hijo con Pedro Galache Airez: " +
-    "PROBABLE, pendiente de localizar la partida o documento " +
-    "que la confirme directamente.";
+      first:"Pedro",
+      last:"Galache Romero",
 
-  pedroAirez.father = celestino.id;
+      variants:"",
 
-  pedroAirez.notes +=
-    " Relación con Celestino Galache: " +
-    "HIPÓTESIS pendiente de documentación.";
+      birth:"29/06/1897",
+      birthPlace:"Genalguacil",
 
-  pedroAirez.certainty = "Probable";
+      parish:"",
 
-  celestino.father = santiago.id;
+      baptism:"",
+      baptismPlace:"Genalguacil",
 
-  celestino.notes +=
-    " Relación con Santiago Galache: " +
-    "HIPÓTESIS pendiente de documentación.";
+      marriage:"",
+      marriagePlace:"",
 
-  db.people.push(
-    pedroRomero,
-    pedroAirez,
-    celestino,
-    santiago
-  );
+      death:"",
+      deathPlace:"",
+
+      job:"",
+      residence:"",
+
+      father:"",
+      mother:"",
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Nacido en Genalguacil el 29/06/1897. " +
+        "Es el punto de partida de la investigación de la línea familiar. " +
+        "Su esposa fue Francisca Rubio Rubio. " +
+        "Debe completarse la documentación directa de su filiación."
+    });
+
+
+  const francisca =
+    addPerson({
+
+      first:"Francisca",
+      last:"Rubio Rubio",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"",
+
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      job:"",
+      residence:"",
+
+      father:"",
+      mother:"",
+
+      spouse:pedroRomero.id,
+
+      certainty:"Confirmado",
+
+      notes:
+        "Esposa de Pedro Galache Romero. " +
+        "Consta en la línea familiar investigada. " +
+        "Pendiente completar fechas y documentación."
+    });
+
+  pedroRomero.spouse =
+    francisca.id;
+
+
+  /*
+    -------------------------------------------------
+    HIJOS CONOCIDOS DE PEDRO Y FRANCISCA
+    -------------------------------------------------
+  */
+
+  const teodoro =
+    addPerson({
+
+      first:"Teodoro",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      father:pedroRomero.id,
+      mother:francisca.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Hijo de Pedro Galache Romero y Francisca Rubio Rubio. " +
+        "Forma parte de los hijos conocidos de la pareja. " +
+        "Pendientes fechas y documentación individual."
+    });
+
+  const micaela =
+    addPerson({
+
+      first:"Micaela",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      father:pedroRomero.id,
+      mother:francisca.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Hija de Pedro Galache Romero y Francisca Rubio Rubio. " +
+        "Pendientes fechas y documentación individual."
+    });
+
+  const pedroHijo =
+    addPerson({
+
+      first:"Pedro",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      father:pedroRomero.id,
+      mother:francisca.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Hijo de Pedro Galache Romero y Francisca Rubio Rubio. " +
+        "Pendientes fechas y documentación individual."
+    });
+
+  const pastora =
+    addPerson({
+
+      first:"Pastora",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      father:pedroRomero.id,
+      mother:francisca.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Hija de Pedro Galache Romero y Francisca Rubio Rubio. " +
+        "Pendientes fechas y documentación individual."
+    });
+
+  const violeta =
+    addPerson({
+
+      first:"Violeta",
+      last:"Galache Rubio",
+
+      variants:"",
+
+      birth:"28/08/1927",
+      birthPlace:"",
+
+      father:pedroRomero.id,
+      mother:francisca.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Nacida el 28/08/1927. " +
+        "Hija de Pedro Galache Romero y Francisca Rubio Rubio. " +
+        "Falleció en 1977, a los 49 años. " +
+        "Pendiente documentar la partida correspondiente."
+    });
+
+  const antonia =
+    addPerson({
+
+      first:"Antonia",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      father:pedroRomero.id,
+      mother:francisca.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Hija de Pedro Galache Romero y Francisca Rubio Rubio. " +
+        "Pendientes fechas y documentación individual."
+    });
+
+
+  /*
+    -------------------------------------------------
+    PEDRO GALACHE AIREZ
+    -------------------------------------------------
+  */
+
+  const pedroAirez =
+    addPerson({
+
+      first:"Pedro",
+      last:"Galache Airez",
+
+      variants:
+        "Airez / Aires / Airéz",
+
+      birth:"31/01/1856",
+      birthPlace:"Villavieja de Yeltes",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"Villavieja de Yeltes",
+
+      marriage:"",
+      marriagePlace:"Genalguacil",
+
+      death:"",
+      deathPlace:"",
+
+      job:"",
+      residence:"",
+
+      father:"",
+      mother:"",
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Nacido en Villavieja de Yeltes el 31/01/1856. " +
+        "En la documentación aparece la procedencia de Villavieja. " +
+        "La grafía del apellido aparece como Airez/Aires/Airéz. " +
+        "Se considera la misma persona que figura en la investigación de Genalguacil. " +
+        "Contrajo matrimonio en Genalguacil en 1883. " +
+        "Padres documentados: Celestino Galache y Teodora Aires."
+    });
+
+
+  const isabel =
+    addPerson({
+
+      first:"Isabel",
+      last:"Romero Sánchez",
+
+      variants:"",
+
+      birth:"1862",
+      birthPlace:"Genalguacil",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"Genalguacil",
+
+      marriage:"1883",
+      marriagePlace:"Genalguacil",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+      spouse:pedroAirez.id,
+
+      certainty:"Confirmado",
+
+      notes:
+        "Esposa de Pedro Galache Airez. " +
+        "Nacida en Genalguacil en 1862. " +
+        "El matrimonio se sitúa en Genalguacil en 1883."
+    });
+
+  pedroAirez.spouse =
+    isabel.id;
+
+
+  /*
+    -------------------------------------------------
+    CELESTINO / CASIMIRO
+    -------------------------------------------------
+  */
+
+  const celestino =
+    addPerson({
+
+      first:"Celestino",
+      last:"Galache",
+
+      variants:
+        "Posible variante documental: Casimiro",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Padre de Pedro Galache Airez según la documentación familiar/documental " +
+        "recuperada en la investigación. Esposo de Teodora Aires. " +
+        "Existe una duda concreta en una partida matrimonial donde aparece el nombre " +
+        "Celestino/Casimiro. Se conserva la hipótesis de que el sacerdote pudo escribir " +
+        "Casimiro por error, pero esta cuestión queda pendiente de comprobación documental."
+    });
+
+
+  const teodora =
+    addPerson({
+
+      first:"Teodora",
+      last:"Aires",
+
+      variants:
+        "Aires / Ayres",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+
+      spouse:celestino.id,
+
+      certainty:"Confirmado",
+
+      notes:
+        "Esposa de Celestino Galache y madre de Pedro Galache Airez."
+    });
+
+  celestino.spouse =
+    teodora.id;
+
+  pedroAirez.father =
+    celestino.id;
+
+
+  /*
+    -------------------------------------------------
+    SANTIAGO GALACHE
+    -------------------------------------------------
+  */
+
+  const santiago =
+    addPerson({
+
+      first:"Santiago",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+
+      spouse:"",
+
+      certainty:"Probable",
+
+      notes:
+        "Generación anterior de la línea de Genalguacil. " +
+        "Figura como padre de Celestino Galache en la investigación. " +
+        "Esposo de Florentina García. " +
+        "Pendiente localizar la documentación original que confirme directamente la filiación."
+    });
+
+
+  const florentina =
+    addPerson({
+
+      first:"Florentina",
+      last:"García",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+
+      spouse:santiago.id,
+
+      certainty:"Probable",
+
+      notes:
+        "Esposa de Santiago Galache. " +
+        "La filiación y el apellido deben verificarse en documentación original."
+    });
+
+  santiago.spouse =
+    florentina.id;
+
+  celestino.father =
+    santiago.id;
+
+  celestino.mother =
+    florentina.id;
+
+
+  /*
+    -------------------------------------------------
+    RAMA SALAMANCA — VILLARES DE YELTES
+    -------------------------------------------------
+  */
+
+  const franciscoPadre =
+    addPerson({
+
+      first:"Francisco",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+      spouse:"",
+
+      certainty:"Probable",
+
+      notes:
+        "Padre de Francisco Galache Fraile. " +
+        "Esposo de María Fraile. " +
+        "La relación se encuentra dentro de la rama salmantina investigada."
+    });
+
+
+  const mariaFraile =
+    addPerson({
+
+      first:"María",
+      last:"Fraile",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+      spouse:franciscoPadre.id,
+
+      certainty:"Probable",
+
+      notes:
+        "Esposa de Francisco Galache y madre de Francisco Galache Fraile."
+    });
+
+  franciscoPadre.spouse =
+    mariaFraile.id;
+
+
+  const franciscoFraile =
+    addPerson({
+
+      first:"Francisco",
+      last:"Galache Fraile",
+
+      variants:"",
+
+      birth:"1705",
+      birthPlace:"Ituero de Huebra",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"04/05/1733",
+      marriagePlace:"Villares de Yeltes",
+
+      death:"",
+      deathPlace:"",
+
+      father:franciscoPadre.id,
+      mother:mariaFraile.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Hijo legítimo de Francisco Galache y María Fraile. " +
+        "Nacido en Ituero de Huebra en 1705. " +
+        "Contrajo matrimonio con María Melgar el 04/05/1733 en Villares de Yeltes."
+    });
+
+
+  const mariaMelgar =
+    addPerson({
+
+      first:"María",
+      last:"Melgar",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"",
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"04/05/1733",
+      marriagePlace:"Villares de Yeltes",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+      spouse:franciscoFraile.id,
+
+      certainty:"Confirmado",
+
+      notes:
+        "Hija legítima de Mateo Melgar y Ana, cuyo apellido está pendiente de confirmar. " +
+        "Contrajo matrimonio con Francisco Galache Fraile el 04/05/1733 en Villares de Yeltes."
+    });
+
+  franciscoFraile.spouse =
+    mariaMelgar.id;
+
+
+  const mateo =
+    addPerson({
+
+      first:"Matheo",
+      last:"Galache Sánchez-Melgar",
+
+      variants:
+        "Matheo / Mateo",
+
+      birth:"1743",
+      birthPlace:"",
+
+      parish:"Villavieja de Yeltes",
+
+      baptism:"1743",
+      baptismPlace:"",
+
+      marriage:"17/06/1767",
+      marriagePlace:"Villavieja de Yeltes",
+
+      death:"",
+      deathPlace:"",
+
+      father:franciscoFraile.id,
+      mother:mariaMelgar.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Hijo de Francisco Galache Fraile y María Melgar. " +
+        "Bautizado/nacido en 1743. " +
+        "Contrajo matrimonio en Villavieja de Yeltes el 17/06/1767. " +
+        "Esta rama constituye uno de los enlaces investigados entre Salamanca y Villavieja."
+    });
+
+
+  /*
+    -------------------------------------------------
+    OTRA RAMA DOCUMENTADA EN VILLAVIEJA
+    -------------------------------------------------
+  */
+
+  const manuel =
+    addPerson({
+
+      first:"Manuel",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"Villavieja de Yeltes",
+
+      baptism:"",
+      baptismPlace:"Villavieja de Yeltes",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "La partida de bautismo de María, fechada el 26/10/1851 en Villavieja de Yeltes, " +
+        "identifica a Manuel Galache como padre y a Agustina Estévez como madre. " +
+        "Abuelos paternos: Santiago Galache y Florentina García."
+    });
+
+
+  const agustina =
+    addPerson({
+
+      first:"Agustina",
+      last:"Estévez",
+
+      variants:"",
+
+      birth:"",
+      birthPlace:"",
+
+      parish:"Villavieja de Yeltes",
+
+      baptism:"",
+      baptismPlace:"",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:"",
+      mother:"",
+      spouse:manuel.id,
+
+      certainty:"Confirmado",
+
+      notes:
+        "Esposa de Manuel Galache y madre de María bautizada en Villavieja de Yeltes " +
+        "el 26/10/1851."
+    });
+
+  manuel.spouse =
+    agustina.id;
+
+
+  const maria1851 =
+    addPerson({
+
+      first:"María",
+      last:"Galache",
+
+      variants:"",
+
+      birth:"22/10/1851",
+      birthPlace:"Villavieja de Yeltes",
+
+      parish:"Villavieja de Yeltes",
+
+      baptism:"26/10/1851",
+      baptismPlace:"Villavieja de Yeltes",
+
+      marriage:"",
+      marriagePlace:"",
+
+      death:"",
+      deathPlace:"",
+
+      father:manuel.id,
+      mother:agustina.id,
+
+      spouse:"",
+
+      certainty:"Confirmado",
+
+      notes:
+        "Nació el 22/10/1851 a la 1 de la noche. " +
+        "Fue bautizada el 26/10/1851 en Villavieja de Yeltes. " +
+        "Padres: Manuel Galache y Agustina Estévez. " +
+        "Abuelos paternos: Santiago Galache y Florentina García."
+    });
+
+
+  /*
+    -------------------------------------------------
+    RELACIÓN SANTIAGO → MANUEL
+    -------------------------------------------------
+
+    No se fuerza aquí como filiación porque la
+    documentación disponible todavía debe revisarse
+    para conectar ambas ramas de forma directa.
+  */
+
+
+  /*
+    -------------------------------------------------
+    FUENTES
+    -------------------------------------------------
+  */
+
+  addSource({
+
+    person:pedroRomero.id,
+
+    type:"Información familiar",
+
+    date:"",
+
+    ref:"",
+
+    desc:
+      "Pedro Galache Romero, nacido en Genalguacil el 29/06/1897. " +
+      "Es el punto de partida de la investigación de la línea familiar."
+  });
+
+
+  addSource({
+
+    person:pedroAirez.id,
+
+    type:"Partida bautismal",
+
+    date:"1856",
+
+    ref:"",
+
+    desc:
+      "Partida localizada en Villavieja de Yeltes correspondiente a Pedro Galache Airez. " +
+      "La fecha de nacimiento registrada en la investigación es 31/01/1856. " +
+      "Coinciden nombre, padres y lugar con la información procedente de Genalguacil."
+  });
+
+
+  addSource({
+
+    person:pedroAirez.id,
+
+    type:"Partida matrimonial",
+
+    date:"1883",
+
+    ref:"",
+
+    desc:
+      "Matrimonio de Pedro Galache Airez con Isabel Romero Sánchez en Genalguacil."
+  });
+
+
+  addSource({
+
+    person:celestino.id,
+
+    type:"Partida matrimonial",
+
+    date:"",
+
+    ref:"https://www.familysearch.org/ark:/61903/3:1:S3HT-6SZ3-NWF?cat=koha%3A216104&view=fullText&lang=es&groupId=M9ZG-BTT",
+
+    desc:
+      "Documento de matrimonio utilizado en la investigación de la identidad Celestino/Casimiro. " +
+      "Existe la hipótesis de que el sacerdote pudo escribir un nombre distinto por error."
+  });
+
+
+  addSource({
+
+    person:franciscoFraile.id,
+
+    type:"Partida matrimonial",
+
+    date:"04/05/1733",
+
+    ref:"",
+
+    desc:
+      "Matrimonio de Francisco Galache Fraile, hijo legítimo de Francisco Galache y María Fraile, " +
+      "con María Melgar, hija legítima de Mateo Melgar y Ana [apellido pendiente de confirmar], " +
+      "celebrado en Villares de Yeltes."
+  });
+
+
+  addSource({
+
+    person:mateo.id,
+
+    type:"Partida matrimonial",
+
+    date:"17/06/1767",
+
+    ref:"",
+
+    desc:
+      "Matrimonio de Matheo Galache Sánchez-Melgar en Villavieja de Yeltes."
+  });
+
+
+  addSource({
+
+    person:maria1851.id,
+
+    type:"Partida bautismal",
+
+    date:"26/10/1851",
+
+    ref:"",
+
+    desc:
+      "Partida de bautismo de María Galache. Nació el 22/10/1851 a la 1 de la noche. " +
+      "Padres: Manuel Galache y Agustina Estévez. " +
+      "Abuelos paternos: Santiago Galache y Florentina García."
+  });
+
+
+  /*
+    -------------------------------------------------
+    INVESTIGACIONES YA REALIZADAS
+    -------------------------------------------------
+  */
+
+  addResearch({
+
+    person:pedroAirez.id,
+
+    date:"",
+
+    query:
+      "Bautismo de Pedro Galache Airez",
+
+    place:
+      "Villavieja de Yeltes",
+
+    years:
+      "1850-1857",
+
+    result:
+      "Encontrado",
+
+    detail:
+      "Se localizó una partida de 1856 que coincide con Pedro Galache Airez: " +
+      "nombre, padres y lugar de nacimiento. Se considera una coincidencia documental " +
+      "muy fuerte con el Pedro Galache que posteriormente aparece en Genalguacil."
+  });
+
+
+  addResearch({
+
+    person:pedroAirez.id,
+
+    date:"",
+
+    query:
+      "Búsqueda de Pedro Galache en los libros de Villavieja",
+
+    place:
+      "Villavieja de Yeltes",
+
+    years:
+      "1850-1857",
+
+    result:
+      "Parcial",
+
+    detail:
+      "Se revisaron los libros disponibles de bautismos/confirmaciones. " +
+      "La investigación encontró la partida de 1856 que coincide con la información " +
+      "de Genalguacil."
+  });
+
+
+  addResearch({
+
+    person:pedroRomero.id,
+
+    date:"",
+
+    query:
+      "Origen de Pedro Galache Romero",
+
+    place:
+      "Genalguacil",
+
+    years:
+      "1897",
+
+    result:
+      "Encontrado",
+
+    detail:
+      "Nacimiento de Pedro Galache Romero: 29/06/1897 en Genalguacil."
+  });
+
+
+  addResearch({
+
+    person:franciscoFraile.id,
+
+    date:"",
+
+    query:
+      "Matrimonio de Francisco Galache Fraile",
+
+    place:
+      "Villares de Yeltes",
+
+    years:
+      "1733",
+
+    result:
+      "Encontrado",
+
+    detail:
+      "La partida de matrimonio confirma que Francisco Galache Fraile, hijo legítimo " +
+      "de Francisco Galache y María Fraile, contrajo matrimonio con María Melgar, " +
+      "hija legítima de Mateo Melgar y Ana [apellido pendiente de confirmar], " +
+      "el 04/05/1733 en Villares de Yeltes."
+  });
+
+
+  /*
+    Guardar solamente después de haber incorporado
+    los datos nuevos.
+  */
 
   saveDB();
 }
@@ -2046,11 +3397,6 @@ function seedGalache(){
 
 loadDB();
 
-/*
-  Si la aplicación está completamente vacía,
-  introduce los cuatro puntos de partida de nuestra
-  investigación.
-*/
 seedGalache();
 
 refreshAllSelectors();
@@ -2065,7 +3411,5 @@ updateStats();
 
 refreshTreeSelectors();
 
-</script>
-
-</body>
+</script></body>
 </html>
