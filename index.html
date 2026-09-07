@@ -21,10 +21,73 @@ header{
   padding:18px;
   text-align:center;
   border-bottom:1px solid #303640;
+  position:relative;
 }
 
 header h1{margin:0;font-size:24px}
 header p{margin:6px 0 0;color:#aaa}
+
+/* ESCUDO */
+
+.escudo{
+  position:absolute;
+  right:18px;
+  top:12px;
+  width:65px;
+  height:65px;
+  border:1px dashed #59616d;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#101318;
+}
+
+.escudo img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.escudo span{
+  font-size:10px;
+  color:#777;
+  text-align:center;
+  padding:4px;
+}
+
+.escudo-btn{
+  position:absolute;
+  right:18px;
+  top:80px;
+  z-index:10;
+  font-size:11px;
+  padding:5px 8px;
+  border-radius:6px;
+  border:1px solid #39414c;
+  background:#252b34;
+  color:#ddd;
+  cursor:pointer;
+}
+
+@media(max-width:600px){
+  .escudo{
+    width:52px;
+    height:52px;
+    right:10px;
+    top:10px;
+  }
+
+  .escudo-btn{
+    right:10px;
+    top:67px;
+  }
+
+  header{
+    padding-right:75px;
+  }
+}
 
 nav{
   display:flex;
@@ -49,7 +112,7 @@ nav button.active{
 }
 
 main{
-  max-width:900px;
+  max-width:1100px;
   margin:auto;
   padding:12px;
 }
@@ -159,30 +222,164 @@ button{
 .probable{background:#715d1d}
 .hipotesis{background:#674174}
 .pendiente{background:#414954}
+.posible{background:#665b25}
+.desconocido{background:#414954}
+
+
+/* =====================================================
+   ÁRBOL
+===================================================== */
 
 .tree{
-  text-align:center;
   overflow:auto;
+  text-align:center;
 }
 
-.tree-row{
+.tree-title{
+  text-align:center;
+  margin-bottom:14px;
+}
+
+.tree-canvas{
+  min-width:max-content;
+  padding:20px 25px 35px;
+}
+
+.tree-generation{
   display:flex;
   justify-content:center;
-  gap:10px;
-  min-width:max-content;
-  margin:10px 0;
+  align-items:flex-start;
+  gap:18px;
+  margin:18px 0;
+  position:relative;
+}
+
+.tree-couple{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  position:relative;
 }
 
 .tree-box{
-  width:180px;
+  width:205px;
+  min-height:92px;
   background:#242a33;
   border:1px solid #3a424d;
-  border-radius:10px;
+  border-radius:12px;
   padding:12px;
+  cursor:pointer;
+  transition:.15s;
+  text-align:center;
+  box-shadow:0 3px 10px rgba(0,0,0,.18);
 }
 
-.tree-box strong{display:block}
-.tree-box small{color:#aaa}
+.tree-box:hover{
+  background:#303743;
+  transform:translateY(-2px);
+}
+
+.tree-box.main-person{
+  border:2px solid #368fe8;
+  background:#252f3b;
+}
+
+.tree-box.spouse{
+  border-color:#755f82;
+}
+
+.tree-name{
+  font-weight:bold;
+  font-size:14px;
+  line-height:1.25;
+}
+
+.tree-date{
+  color:#aaa;
+  font-size:12px;
+  margin-top:6px;
+}
+
+.tree-relation{
+  color:#8e98a6;
+  font-size:10px;
+  margin-top:7px;
+}
+
+.tree-marriage{
+  color:#aaa;
+  font-size:12px;
+  margin:0 4px;
+}
+
+.tree-connector{
+  width:2px;
+  height:20px;
+  background:#4a535f;
+  margin:auto;
+}
+
+.tree-horizontal{
+  height:2px;
+  background:#4a535f;
+  margin:0 auto;
+}
+
+.tree-empty{
+  width:205px;
+  min-height:92px;
+  border:1px dashed #39414c;
+  border-radius:12px;
+  padding:20px 10px;
+  color:#666;
+}
+
+.tree-legend{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:15px;
+}
+
+.tree-legend span{
+  font-size:11px;
+  color:#aaa;
+  background:#242a33;
+  padding:5px 8px;
+  border-radius:8px;
+}
+
+.tree-note{
+  margin-top:15px;
+  padding:10px;
+  background:#171c23;
+  border-radius:8px;
+  color:#999;
+  font-size:12px;
+}
+
+
+/* =====================================================
+   FICHA RÁPIDA DE PERSONA
+===================================================== */
+
+.person-card{
+  text-align:left;
+}
+
+.person-card h3{
+  margin-bottom:5px;
+}
+
+.person-card .muted{
+  margin-bottom:8px;
+}
+
+
+/* =====================================================
+   ESTADÍSTICAS
+===================================================== */
 
 .statgrid{
   display:grid;
@@ -219,11 +416,16 @@ button{
   font-size:13px;
 }
 
+
+/* =====================================================
+   MODALES
+===================================================== */
+
 .modal{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.8);
+  background:rgba(0,0,0,.82);
   z-index:1000;
   align-items:center;
   justify-content:center;
@@ -236,11 +438,43 @@ button{
 
 .modalbox{
   width:100%;
-  max-width:500px;
+  max-width:560px;
+  max-height:90vh;
+  overflow:auto;
   background:#1b2028;
   border:1px solid #3a424d;
   border-radius:12px;
   padding:16px;
+}
+
+.detail-row{
+  display:grid;
+  grid-template-columns:145px 1fr;
+  gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid #303640;
+}
+
+.detail-label{
+  color:#8f98a5;
+  font-size:13px;
+}
+
+.detail-value{
+  color:#fff;
+  font-size:14px;
+  white-space:pre-wrap;
+}
+
+@media(max-width:600px){
+  .detail-row{
+    grid-template-columns:1fr;
+    gap:3px;
+  }
+}
+
+.hidden{
+  display:none !important;
 }
 </style>
 </head>
@@ -248,39 +482,91 @@ button{
 <body>
 
 <header>
+
 <h1>🌳 Antepasados</h1>
 <p>Investigación genealógica GALACHE</p>
+
+<div class="escudo" id="escudoBox">
+  <span>Escudo<br>GALACHE</span>
+</div>
+
+<button class="escudo-btn" onclick="cargarEscudo()">
+🛡️ Escudo
+</button>
+
+<input
+  type="file"
+  id="escudoInput"
+  accept="image/*"
+  style="display:none"
+  onchange="guardarEscudo(event)"
+>
+
 </header>
 
+
 <nav>
-<button class="nav active" onclick="tab('arbol',this)">🌳 Árbol</button>
-<button class="nav" onclick="tab('personas',this)">👤 Personas</button>
-<button class="nav" onclick="tab('investigacion',this)">🔎 Investigación</button>
-<button class="nav" onclick="tab('fuentes',this)">📚 Fuentes</button>
-<button class="nav" onclick="tab('copia',this)">💾 Copia</button>
+
+<button class="nav active"
+        onclick="tab('arbol',this)">
+🌳 Árbol
+</button>
+
+<button class="nav"
+        onclick="tab('personas',this)">
+👤 Personas
+</button>
+
+<button class="nav"
+        onclick="tab('investigacion',this)">
+🔎 Investigación
+</button>
+
+<button class="nav"
+        onclick="tab('fuentes',this)">
+📚 Fuentes
+</button>
+
+<button class="nav"
+        onclick="tab('copia',this)">
+💾 Copia
+</button>
+
 </nav>
+
 
 <main>
 
-<!-- ================= ÁRBOL ================= -->
+
+<!-- =====================================================
+     ÁRBOL
+===================================================== -->
 
 <section id="arbol" class="tab active">
 
 <div class="card">
 
-<h2>Árbol familiar</h2>
+<h2>🌳 Árbol familiar</h2>
 
 <label>Persona principal</label>
 
-<select id="treeSelect" onchange="dibujarArbol()"></select>
+<select id="treeSelect"
+        onchange="dibujarArbol()">
+</select>
+
+<p class="muted">
+Pulsa sobre cualquier persona del árbol para ver todos sus datos.
+</p>
 
 </div>
+
 
 <div class="card tree">
 
 <div id="tree"></div>
 
 </div>
+
 
 <div class="card">
 
@@ -310,7 +596,9 @@ button{
 </section>
 
 
-<!-- ================= PERSONAS ================= -->
+<!-- =====================================================
+     PERSONAS
+===================================================== -->
 
 <section id="personas" class="tab">
 
@@ -318,7 +606,8 @@ button{
 
 <h2>Personas</h2>
 
-<button class="btn" onclick="nuevaPersona()">
+<button class="btn"
+        onclick="nuevaPersona()">
 ➕ Nueva persona
 </button>
 
@@ -424,8 +713,6 @@ button{
 <input id="residencia">
 
 
-<!-- PADRE -->
-
 <label>Padre</label>
 
 <div class="relation">
@@ -440,8 +727,6 @@ button{
 </div>
 
 
-<!-- MADRE -->
-
 <label>Madre</label>
 
 <div class="relation">
@@ -455,8 +740,6 @@ button{
 
 </div>
 
-
-<!-- CÓNYUGE -->
 
 <label>Cónyuge</label>
 
@@ -510,7 +793,9 @@ button{
 </section>
 
 
-<!-- ================= INVESTIGACIÓN ================= -->
+<!-- =====================================================
+     INVESTIGACIÓN
+===================================================== -->
 
 <section id="investigacion" class="tab">
 
@@ -536,7 +821,8 @@ button{
 <option>Sin resultado</option>
 </select>
 
-<button class="btn" onclick="guardarInvestigacion()">
+<button class="btn"
+        onclick="guardarInvestigacion()">
 💾 Guardar
 </button>
 
@@ -553,7 +839,9 @@ button{
 </section>
 
 
-<!-- ================= FUENTES ================= -->
+<!-- =====================================================
+     FUENTES
+===================================================== -->
 
 <section id="fuentes" class="tab">
 
@@ -588,7 +876,8 @@ button{
 <label>Notas</label>
 <textarea id="fuenteNotas"></textarea>
 
-<button class="btn" onclick="guardarFuente()">
+<button class="btn"
+        onclick="guardarFuente()">
 💾 Guardar fuente
 </button>
 
@@ -603,7 +892,9 @@ button{
 </section>
 
 
-<!-- ================= COPIA ================= -->
+<!-- =====================================================
+     COPIA
+===================================================== -->
 
 <section id="copia" class="tab">
 
@@ -644,16 +935,22 @@ Exporta todos los datos de Antepasados a un archivo JSON.
 
 </section>
 
+
 </main>
 
 
-<!-- ================= MODAL ================= -->
+<!-- =====================================================
+     MODAL ALTA RÁPIDA
+===================================================== -->
 
-<div id="modal" class="modal">
+<div id="modal"
+     class="modal">
 
 <div class="modalbox">
 
-<h2 id="modalTitulo">Nueva persona</h2>
+<h2 id="modalTitulo">
+Nueva persona
+</h2>
 
 <label>Nombre</label>
 <input id="nuevoNombre">
@@ -683,6 +980,40 @@ Cancelar
 </div>
 
 
+<!-- =====================================================
+     MODAL FICHA PERSONA
+===================================================== -->
+
+<div id="personaModal"
+     class="modal">
+
+<div class="modalbox">
+
+<h2 id="fichaTitulo">
+Persona
+</h2>
+
+<div id="fichaContenido"></div>
+
+<div class="actions">
+
+<button class="btn"
+        id="fichaEditar">
+✏️ Editar
+</button>
+
+<button class="btn gray"
+        onclick="cerrarFicha()">
+Cerrar
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
 <script>
 
 /* =====================================================
@@ -698,6 +1029,81 @@ let db={
 };
 
 let relacionPendiente="";
+
+
+/* =====================================================
+   ESCUDO
+===================================================== */
+
+const ESCUDO_STORAGE="antepasados_galache_escudo";
+
+
+function cargarEscudo(){
+
+document
+.getElementById("escudoInput")
+.click();
+
+}
+
+
+function guardarEscudo(event){
+
+const archivo=event.target.files[0];
+
+if(!archivo)return;
+
+const lector=new FileReader();
+
+lector.onload=function(){
+
+try{
+
+localStorage.setItem(
+ESCUDO_STORAGE,
+lector.result
+);
+
+mostrarEscudo();
+
+}catch(e){
+
+alert(
+"No se pudo guardar el escudo."
+);
+
+}
+
+};
+
+lector.readAsDataURL(archivo);
+
+}
+
+
+function mostrarEscudo(){
+
+const dato=
+localStorage.getItem(ESCUDO_STORAGE);
+
+const box=
+document.getElementById("escudoBox");
+
+if(!box)return;
+
+if(dato){
+
+box.innerHTML=
+`<img src="${dato}" alt="Escudo GALACHE">`;
+
+}else{
+
+box.innerHTML=
+`<span>Escudo<br>GALACHE</span>`;
+
+}
+
+}
 
 
 /* =====================================================
@@ -728,13 +1134,34 @@ p.apellidos
 
 function persona(id){
 
-return db.personas.find(p=>p.id===id);
+return db.personas.find(
+p=>p.id===id
+);
+
+}
+
+
+function fechaBonita(fecha){
+
+if(!fecha)return "";
+
+const partes=fecha.split("-");
+
+if(partes.length===3){
+
+return partes[2]+"/"+
+partes[1]+"/"+
+partes[0];
+
+}
+
+return fecha;
 
 }
 
 
 /* =====================================================
-   GUARDAR
+   GUARDAR BASE
 ===================================================== */
 
 function guardarDB(){
@@ -750,7 +1177,7 @@ actualizarTodo();
 
 
 /* =====================================================
-   CARGAR
+   CARGAR BASE
 ===================================================== */
 
 function cargarDB(){
@@ -774,9 +1201,7 @@ investigaciones:[]
 
 }
 
-}
-
-else{
+}else{
 
 crearDatosIniciales();
 
@@ -841,26 +1266,40 @@ datos={}
 ){
 
 const p={
+
 id:idNuevo(),
+
 nombre:nombre,
+
 apellidos:apellidos,
+
 variantes:"",
+
 nacimiento:"",
 lugarNacimiento:"",
+
 bautismo:"",
 lugarBautismo:"",
+
 matrimonio:"",
 lugarMatrimonio:"",
+
 defuncion:"",
 lugarDefuncion:"",
+
 profesion:"",
 residencia:"",
+
 padre:"",
 madre:"",
 conyuge:"",
+
 certeza:"Pendiente",
+
 notas:"",
+
 ...datos
+
 };
 
 db.personas.push(p);
@@ -870,7 +1309,9 @@ return p.id;
 }
 
 
-/* ===== PEDRO ===== */
+/* =====================================================
+   PEDRO GALACHE ROMERO
+===================================================== */
 
 const pedroRomero=crear(
 "Pedro",
@@ -880,38 +1321,83 @@ nacimiento:"1897-06-29",
 lugarNacimiento:"Genalguacil",
 certeza:"Confirmado",
 notas:
-"Abuelo. Nacido el 29/06/1897 en Genalguacil. Punto de partida de la investigación."
+"Abuelo. Nacido el 29/06/1897 en Genalguacil."
 }
 );
 
+
+/* =====================================================
+   FRANCISCA RUBIO
+===================================================== */
 
 const francisca=crear(
 "Francisca",
 "Rubio Rubio",
 {
 certeza:"Confirmado",
-notas:"Esposa de Pedro Galache Romero."
+notas:
+"Esposa de Pedro Galache Romero. Madre de Violeta Galache Rubio."
 }
 );
 
 
-/* ===== PEDRO AIREZ ===== */
+/* =====================================================
+   VIOLETA
+===================================================== */
+
+const violeta=crear(
+"Violeta",
+"Galache Rubio",
+{
+nacimiento:"1927-08-28",
+certeza:"Confirmado",
+notas:
+"Hija de Pedro Galache Romero y Francisca Rubio Rubio. Nacida el 28/08/1927. Falleció en 1977."
+}
+);
+
+
+/* =====================================================
+   PLÁCIDO
+===================================================== */
+
+const placido=crear(
+"Plácido",
+"Vázquez Martínez",
+{
+certeza:"Pendiente",
+notas:
+"Esposo de Violeta Galache Rubio. Matrimonio en Genalguacil. Fecha pendiente de localizar."
+}
+);
+
+
+/* =====================================================
+   PEDRO AIREZ
+===================================================== */
 
 const pedroAirez=crear(
 "Pedro",
 "Galache Airez",
 {
 variantes:"Airez / Aires / Airéz",
+
 nacimiento:"1856-01-31",
-lugarNacimiento:"Villavieja de Yeltes",
+
+lugarNacimiento:
+"Villavieja de Yeltes",
+
 certeza:"Probable",
+
 notas:
-"Bisabuelo. Nacido el 31/01/1856 en Villavieja de Yeltes. La partida localizada coincide con los datos conocidos de Genalguacil."
+"Bisabuelo. Nacido el 31/01/1856 en Villavieja de Yeltes. Figura como procedente de Villavieja."
 }
 );
 
 
-/* ===== ISABEL ===== */
+/* =====================================================
+   ISABEL
+===================================================== */
 
 const isabel=crear(
 "Isabel",
@@ -920,12 +1406,15 @@ const isabel=crear(
 nacimiento:"1862-01-01",
 lugarNacimiento:"Genalguacil",
 certeza:"Confirmado",
-notas:"Bisabuela. Nacida en Genalguacil en 1862."
+notas:
+"Bisabuela. Nacida en Genalguacil en 1862."
 }
 );
 
 
-/* ===== CELESTINO ===== */
+/* =====================================================
+   CELESTINO
+===================================================== */
 
 const celestino=crear(
 "Celestino",
@@ -943,12 +1432,15 @@ const teodora=crear(
 "Ayres",
 {
 certeza:"Confirmado",
-notas:"Esposa de Celestino Galache."
+notas:
+"Esposa de Celestino Galache."
 }
 );
 
 
-/* ===== FRANCISCO 1733 ===== */
+/* =====================================================
+   FRANCISCO GALACHE FRAILE
+===================================================== */
 
 const franciscoFraile=crear(
 "Francisco",
@@ -956,34 +1448,51 @@ const franciscoFraile=crear(
 {
 nacimiento:"1705-01-01",
 lugarNacimiento:"Ituero de Huebra",
+
 matrimonio:"1733-05-04",
 lugarMatrimonio:"Villares de Yeltes",
+
 certeza:"Confirmado",
+
 notas:
-"Hijo legítimo de Francisco Galache y María Fraile. Contrajo matrimonio con María Melgar el 04/05/1733 en Villares de Yeltes."
+"Hijo legítimo de Francisco Galache y María Fraile. Contrajo matrimonio con María Melgar el 04/05/1733 en Villares de Yeltes. La partida matrimonial no indica dónde nació ni de qué lugar procedía."
 }
 );
 
+
+/* =====================================================
+   FRANCISCO GALACHE PADRE
+===================================================== */
 
 const francisco=crear(
 "Francisco",
 "Galache",
 {
 certeza:"Confirmado",
-notas:"Padre de Francisco Galache Fraile."
+notas:
+"Padre de Francisco Galache Fraile. Casado con María Fraile. Se sigue buscando su matrimonio. No localizado en Villares, Ituero ni Ituerino en la revisión realizada."
 }
 );
 
+
+/* =====================================================
+   MARÍA FRAILE
+===================================================== */
 
 const mariaFraile=crear(
 "María",
 "Fraile",
 {
 certeza:"Confirmado",
-notas:"Madre de Francisco Galache Fraile."
+notas:
+"Madre de Francisco Galache Fraile. Esposa de Francisco Galache. Lugar y fecha de matrimonio pendientes de localizar."
 }
 );
 
+
+/* =====================================================
+   MARÍA MELGAR
+===================================================== */
 
 const mariaMelgar=crear(
 "María",
@@ -991,22 +1500,33 @@ const mariaMelgar=crear(
 {
 matrimonio:"1733-05-04",
 lugarMatrimonio:"Villares de Yeltes",
+
 certeza:"Confirmado",
+
 notas:
 "Hija legítima de Mateo Melgar y Ana. Esposa de Francisco Galache Fraile."
 }
 );
 
 
+/* =====================================================
+   MATEO MELGAR
+===================================================== */
+
 const mateo=crear(
 "Mateo",
 "Melgar",
 {
 certeza:"Confirmado",
-notas:"Padre de María Melgar."
+notas:
+"Padre de María Melgar."
 }
 );
 
+
+/* =====================================================
+   ANA
+===================================================== */
 
 const ana=crear(
 "Ana",
@@ -1014,24 +1534,32 @@ const ana=crear(
 {
 certeza:"Pendiente",
 notas:
-"Madre de María Melgar. Apellido pendiente de confirmar. Posiblemente Fernández, pero no confirmado."
+"Madre de María Melgar. En la partida matrimonial de 1733 el apellido parece ser Fernández, pero queda pendiente de confirmación."
 }
 );
 
+
+/* =====================================================
+   MATHEO
+===================================================== */
 
 const matheo=crear(
 "Matheo",
 "Galache Sánchez-Melgar",
 {
 nacimiento:"1743-01-01",
+
 certeza:"Confirmado",
+
 notas:
 "Nacido en 1743. Vinculado a Francisco Galache Fraile y María Melgar. Matrimonio en Villavieja de Yeltes el 17/06/1767."
 }
 );
 
 
-/* ===== VILLAVIEJA 1851 ===== */
+/* =====================================================
+   VILLAVIEJA 1851
+===================================================== */
 
 const santiago1851=crear(
 "Santiago",
@@ -1082,16 +1610,23 @@ const maria1851=crear(
 "",
 {
 nacimiento:"1851-10-22",
+
 bautismo:"1851-10-26",
-lugarBautismo:"Villavieja de Yeltes",
+
+lugarBautismo:
+"Villavieja de Yeltes",
+
 certeza:"Confirmado",
+
 notas:
 "Nació el 22/10/1851 a la 1 de la noche. Hija legítima de Manuel Galache y Agustina Estévez. Abuelos paternos Santiago Galache y Florentina García."
 }
 );
 
 
-/* ===== JOSEFA 1875 ===== */
+/* =====================================================
+   JOSEFA 1875
+===================================================== */
 
 const sebastian=crear(
 "Sebastián",
@@ -1131,7 +1666,9 @@ const josefa=crear(
 "Galache",
 {
 nacimiento:"1875-01-01",
+
 certeza:"Confirmado",
+
 notas:
 "Partida de bautismo de 1875. Hija de Julián Galache. Abuelos Sebastián Galache y Dorotea Melgar."
 }
@@ -1139,8 +1676,20 @@ notas:
 
 
 /* =====================================================
-   RELACIONES CONFIRMADAS
+   RELACIONES
 ===================================================== */
+
+
+/* Violeta */
+
+persona(violeta).padre=pedroRomero;
+persona(violeta).madre=francisca;
+
+persona(violeta).conyuge=placido;
+persona(placido).conyuge=violeta;
+
+
+/* Pedro */
 
 persona(pedroRomero).padre=pedroAirez;
 persona(pedroRomero).madre=isabel;
@@ -1148,18 +1697,22 @@ persona(pedroRomero).madre=isabel;
 persona(pedroRomero).conyuge=francisca;
 persona(francisca).conyuge=pedroRomero;
 
+
+/* Pedro Airez */
+
 persona(pedroAirez).conyuge=isabel;
-persona(isabel).conyuge=pedroAirez;
 
 
 /* Francisco + María */
 
 persona(franciscoFraile).padre=francisco;
 persona(franciscoFraile).madre=mariaFraile;
+
 persona(franciscoFraile).conyuge=mariaMelgar;
 
 persona(mariaMelgar).padre=mateo;
 persona(mariaMelgar).madre=ana;
+
 persona(mariaMelgar).conyuge=franciscoFraile;
 
 persona(matheo).padre=franciscoFraile;
@@ -1183,16 +1736,9 @@ persona(julian).madre=dorotea;
 persona(josefa).padre=julian;
 
 
-/*
-IMPORTANTE:
-
-NO se conecta todavía:
-
-Santiago → Celestino → Pedro Airez
-
-porque esa conexión necesita más pruebas.
-*/
-
+/* =====================================================
+   INVESTIGACIONES INICIALES
+===================================================== */
 
 db.investigaciones.push({
 
@@ -1232,13 +1778,30 @@ db.investigaciones.push({
 
 id:idNuevo(),
 
+fecha:"2026-09-07",
+
+titulo:
+"Francisco Galache y María Fraile",
+
+texto:
+"Se revisaron los registros matrimoniales de Villares de Yeltes, Ituero e Ituerino desde 1680 hasta 1733 sin localizar el matrimonio de Francisco Galache y María Fraile. Se mantiene abierta la búsqueda en otros lugares.",
+
+resultado:"Pendiente"
+
+});
+
+
+db.investigaciones.push({
+
+id:idNuevo(),
+
 fecha:"2026-09-06",
 
 titulo:
 "Francisco Galache Fraile y María Melgar",
 
 texto:
-"Matrimonio confirmado el 04/05/1733 en Villares de Yeltes.",
+"Matrimonio confirmado el 04/05/1733 en Villares de Yeltes. La partida confirma que Francisco es hijo legítimo de Francisco Galache y María Fraile y que ambos contrayentes eran vecinos de Villares.",
 
 resultado:"Confirmado"
 
@@ -1260,18 +1823,23 @@ if(!s)return;
 s.innerHTML=
 '<option value="">— Ninguno / pendiente —</option>';
 
-db.personas
-.sort((a,b)=>
+const lista=[...db.personas];
+
+lista.sort((a,b)=>
 nombrePersona(a).localeCompare(
 nombrePersona(b),
 "es"
-))
-.forEach(p=>{
+)
+);
+
+lista.forEach(p=>{
 
 const o=document.createElement("option");
 
 o.value=p.id;
-o.textContent=nombrePersona(p);
+
+o.textContent=
+nombrePersona(p);
 
 if(p.id===seleccion)
 o.selected=true;
@@ -1285,35 +1853,59 @@ s.appendChild(o);
 
 function actualizarSelectores(){
 
-const padre=document.getElementById("padre")?.value;
-const madre=document.getElementById("madre")?.value;
-const conyuge=document.getElementById("conyuge")?.value;
+const padre=
+document.getElementById("padre")?.value;
 
-cargarSelect("padre",padre);
-cargarSelect("madre",madre);
-cargarSelect("conyuge",conyuge);
+const madre=
+document.getElementById("madre")?.value;
+
+const conyuge=
+document.getElementById("conyuge")?.value;
+
+cargarSelect(
+"padre",
+padre
+);
+
+cargarSelect(
+"madre",
+madre
+);
+
+cargarSelect(
+"conyuge",
+conyuge
+);
 
 
-const tree=document.getElementById("treeSelect");
+const tree=
+document.getElementById("treeSelect");
 
 if(tree){
 
-const actual=tree.value;
+const actual=
+tree.value;
 
 tree.innerHTML="";
 
-db.personas
-.sort((a,b)=>
+const lista=[...db.personas];
+
+lista.sort((a,b)=>
 nombrePersona(a).localeCompare(
 nombrePersona(b),
 "es"
-))
-.forEach(p=>{
+)
+);
 
-const o=document.createElement("option");
+lista.forEach(p=>{
+
+const o=
+document.createElement("option");
 
 o.value=p.id;
-o.textContent=nombrePersona(p);
+
+o.textContent=
+nombrePersona(p);
 
 if(p.id===actual)
 o.selected=true;
@@ -1333,25 +1925,36 @@ tree.appendChild(o);
 
 function limpiarFormulario(){
 
-document.getElementById("id").value="";
-document.getElementById("nombre").value="";
-document.getElementById("apellidos").value="";
-document.getElementById("variantes").value="";
-document.getElementById("nacimiento").value="";
-document.getElementById("lugarNacimiento").value="";
-document.getElementById("bautismo").value="";
-document.getElementById("lugarBautismo").value="";
-document.getElementById("matrimonio").value="";
-document.getElementById("lugarMatrimonio").value="";
-document.getElementById("defuncion").value="";
-document.getElementById("lugarDefuncion").value="";
-document.getElementById("profesion").value="";
-document.getElementById("residencia").value="";
+const ids=[
+
+"id",
+"nombre",
+"apellidos",
+"variantes",
+"nacimiento",
+"lugarNacimiento",
+"bautismo",
+"lugarBautismo",
+"matrimonio",
+"lugarMatrimonio",
+"defuncion",
+"lugarDefuncion",
+"profesion",
+"residencia",
+"notas"
+
+];
+
+ids.forEach(x=>{
+
+document.getElementById(x).value="";
+
+});
+
 document.getElementById("padre").value="";
 document.getElementById("madre").value="";
 document.getElementById("conyuge").value="";
 document.getElementById("certeza").value="Pendiente";
-document.getElementById("notas").value="";
 
 }
 
@@ -1386,30 +1989,55 @@ document.getElementById("tituloForm")
 
 document.getElementById("id").value=p.id;
 
-document.getElementById("nombre").value=p.nombre||"";
-document.getElementById("apellidos").value=p.apellidos||"";
-document.getElementById("variantes").value=p.variantes||"";
+document.getElementById("nombre").value=
+p.nombre||"";
 
-document.getElementById("nacimiento").value=p.nacimiento||"";
-document.getElementById("lugarNacimiento").value=p.lugarNacimiento||"";
+document.getElementById("apellidos").value=
+p.apellidos||"";
 
-document.getElementById("bautismo").value=p.bautismo||"";
-document.getElementById("lugarBautismo").value=p.lugarBautismo||"";
+document.getElementById("variantes").value=
+p.variantes||"";
 
-document.getElementById("matrimonio").value=p.matrimonio||"";
-document.getElementById("lugarMatrimonio").value=p.lugarMatrimonio||"";
+document.getElementById("nacimiento").value=
+p.nacimiento||"";
 
-document.getElementById("defuncion").value=p.defuncion||"";
-document.getElementById("lugarDefuncion").value=p.lugarDefuncion||"";
+document.getElementById("lugarNacimiento").value=
+p.lugarNacimiento||"";
 
-document.getElementById("profesion").value=p.profesion||"";
-document.getElementById("residencia").value=p.residencia||"";
+document.getElementById("bautismo").value=
+p.bautismo||"";
+
+document.getElementById("lugarBautismo").value=
+p.lugarBautismo||"";
+
+document.getElementById("matrimonio").value=
+p.matrimonio||"";
+
+document.getElementById("lugarMatrimonio").value=
+p.lugarMatrimonio||"";
+
+document.getElementById("defuncion").value=
+p.defuncion||"";
+
+document.getElementById("lugarDefuncion").value=
+p.lugarDefuncion||"";
+
+document.getElementById("profesion").value=
+p.profesion||"";
+
+document.getElementById("residencia").value=
+p.residencia||"";
 
 actualizarSelectores();
 
-document.getElementById("padre").value=p.padre||"";
-document.getElementById("madre").value=p.madre||"";
-document.getElementById("conyuge").value=p.conyuge||"";
+document.getElementById("padre").value=
+p.padre||"";
+
+document.getElementById("madre").value=
+p.madre||"";
+
+document.getElementById("conyuge").value=
+p.conyuge||"";
 
 document.getElementById("certeza").value=
 p.certeza||"Pendiente";
@@ -1431,7 +2059,8 @@ document.querySelectorAll(".nav")[1]
 
 function guardarPersona(){
 
-let id=document.getElementById("id").value;
+let id=
+document.getElementById("id").value;
 
 let p=id?persona(id):null;
 
@@ -1440,25 +2069,36 @@ if(!id){
 id=idNuevo();
 
 p={
+
 id:id,
+
 nombre:"",
 apellidos:"",
 variantes:"",
+
 nacimiento:"",
 lugarNacimiento:"",
+
 bautismo:"",
 lugarBautismo:"",
+
 matrimonio:"",
 lugarMatrimonio:"",
+
 defuncion:"",
 lugarDefuncion:"",
+
 profesion:"",
 residencia:"",
+
 padre:"",
 madre:"",
 conyuge:"",
+
 certeza:"Pendiente",
+
 notas:""
+
 };
 
 db.personas.push(p);
@@ -1466,47 +2106,57 @@ db.personas.push(p);
 }
 
 
-const antiguoConyuge=p.conyuge;
+const antiguoConyuge=
+p.conyuge;
 
 
 p.nombre=
-document.getElementById("nombre").value.trim();
+document.getElementById("nombre")
+.value.trim();
 
 p.apellidos=
-document.getElementById("apellidos").value.trim();
+document.getElementById("apellidos")
+.value.trim();
 
 p.variantes=
-document.getElementById("variantes").value.trim();
+document.getElementById("variantes")
+.value.trim();
 
 p.nacimiento=
 document.getElementById("nacimiento").value;
 
 p.lugarNacimiento=
-document.getElementById("lugarNacimiento").value.trim();
+document.getElementById("lugarNacimiento")
+.value.trim();
 
 p.bautismo=
 document.getElementById("bautismo").value;
 
 p.lugarBautismo=
-document.getElementById("lugarBautismo").value.trim();
+document.getElementById("lugarBautismo")
+.value.trim();
 
 p.matrimonio=
 document.getElementById("matrimonio").value;
 
 p.lugarMatrimonio=
-document.getElementById("lugarMatrimonio").value.trim();
+document.getElementById("lugarMatrimonio")
+.value.trim();
 
 p.defuncion=
 document.getElementById("defuncion").value;
 
 p.lugarDefuncion=
-document.getElementById("lugarDefuncion").value.trim();
+document.getElementById("lugarDefuncion")
+.value.trim();
 
 p.profesion=
-document.getElementById("profesion").value.trim();
+document.getElementById("profesion")
+.value.trim();
 
 p.residencia=
-document.getElementById("residencia").value.trim();
+document.getElementById("residencia")
+.value.trim();
 
 p.padre=
 document.getElementById("padre").value;
@@ -1521,16 +2171,19 @@ p.certeza=
 document.getElementById("certeza").value;
 
 p.notas=
-document.getElementById("notas").value.trim();
+document.getElementById("notas")
+.value.trim();
 
 
 /* Enlace recíproco */
 
 if(p.conyuge){
 
-const c=persona(p.conyuge);
+const c=
+persona(p.conyuge);
 
-if(c)c.conyuge=p.id;
+if(c)
+c.conyuge=p.id;
 
 }
 
@@ -1542,7 +2195,8 @@ antiguoConyuge &&
 antiguoConyuge!==p.conyuge
 ){
 
-const anterior=persona(antiguoConyuge);
+const anterior=
+persona(antiguoConyuge);
 
 if(
 anterior &&
@@ -1635,7 +2289,9 @@ document.getElementById("nuevoApellido")
 
 if(!nombre && !apellidos){
 
-alert("Introduce nombre o apellidos.");
+alert(
+"Introduce nombre o apellidos."
+);
 
 return;
 
@@ -1654,12 +2310,16 @@ variantes:"",
 
 nacimiento:"",
 lugarNacimiento:"",
+
 bautismo:"",
 lugarBautismo:"",
+
 matrimonio:"",
 lugarMatrimonio:"",
+
 defuncion:"",
 lugarDefuncion:"",
+
 profesion:"",
 residencia:"",
 
@@ -1686,17 +2346,11 @@ document.getElementById("id").value
 );
 
 
-if(relacionPendiente==="padre"){
-
+if(relacionPendiente==="padre")
 principal.padre=nuevo.id;
 
-}
-
-if(relacionPendiente==="madre"){
-
+if(relacionPendiente==="madre")
 principal.madre=nuevo.id;
-
-}
 
 if(relacionPendiente==="conyuge"){
 
@@ -1713,13 +2367,16 @@ actualizarSelectores();
 
 
 if(relacionPendiente==="padre")
-document.getElementById("padre").value=nuevo.id;
+document.getElementById("padre").value=
+nuevo.id;
 
 if(relacionPendiente==="madre")
-document.getElementById("madre").value=nuevo.id;
+document.getElementById("madre").value=
+nuevo.id;
 
 if(relacionPendiente==="conyuge")
-document.getElementById("conyuge").value=nuevo.id;
+document.getElementById("conyuge").value=
+nuevo.id;
 
 
 cerrarModal();
@@ -1738,7 +2395,9 @@ document.getElementById("id").value;
 
 if(!id){
 
-alert("No hay persona seleccionada.");
+alert(
+"No hay persona seleccionada."
+);
 
 return;
 
@@ -1754,14 +2413,21 @@ if(!confirm(
 
 
 db.personas=
-db.personas.filter(x=>x.id!==id);
+db.personas.filter(
+x=>x.id!==id
+);
 
 
 db.personas.forEach(x=>{
 
-if(x.padre===id)x.padre="";
-if(x.madre===id)x.madre="";
-if(x.conyuge===id)x.conyuge="";
+if(x.padre===id)
+x.padre="";
+
+if(x.madre===id)
+x.madre="";
+
+if(x.conyuge===id)
+x.conyuge="";
 
 });
 
@@ -1787,6 +2453,8 @@ function listaPersonas(){
 
 const cont=
 document.getElementById("personasLista");
+
+if(!cont)return;
 
 const texto=
 document.getElementById("buscar")
@@ -1816,7 +2484,8 @@ cont.innerHTML="";
 
 lista.forEach(p=>{
 
-const div=document.createElement("div");
+const div=
+document.createElement("div");
 
 div.className="person";
 
@@ -1834,7 +2503,7 @@ div.innerHTML=`
 <strong>${nombrePersona(p)}</strong>
 
 <small>
-${p.nacimiento||""}
+${fechaBonita(p.nacimiento)||""}
 ${p.lugarNacimiento ?
 " · "+p.lugarNacimiento : ""}
 </small>
@@ -1845,10 +2514,19 @@ ${p.certeza||"Pendiente"}
 
 </div>
 
+<div class="actions">
+
+<button class="btn gray"
+onclick="verFicha('${p.id}')">
+Ver
+</button>
+
 <button class="btn"
 onclick="editar('${p.id}')">
 Editar
 </button>
+
+</div>
 
 `;
 
@@ -1860,73 +2538,475 @@ cont.appendChild(div);
 
 
 /* =====================================================
-   ÁRBOL
+   FICHA COMPLETA
 ===================================================== */
 
-function cajaArbol(p){
+function verFicha(id){
 
-if(!p)return "";
+const p=persona(id);
+
+if(!p)return;
+
+document.getElementById("fichaTitulo")
+.textContent=
+nombrePersona(p);
+
+
+function fila(label,valor){
+
+if(!valor)
+valor="—";
 
 return `
 
-<div class="tree-box">
+<div class="detail-row">
 
-<strong>${nombrePersona(p)}</strong>
+<div class="detail-label">
+${label}
+</div>
 
-<small>
-${p.nacimiento||""}
-${p.lugarNacimiento ?
-" · "+p.lugarNacimiento : ""}
-</small>
+<div class="detail-value">
+${valor}
+</div>
 
 </div>
 
 `;
+
+}
+
+
+let padre=p.padre?
+persona(p.padre):null;
+
+let madre=p.madre?
+persona(p.madre):null;
+
+let conyuge=p.conyuge?
+persona(p.conyuge):null;
+
+
+let html="";
+
+html+=fila(
+"Nombre",
+p.nombre
+);
+
+html+=fila(
+"Apellidos",
+p.apellidos
+);
+
+html+=fila(
+"Variantes",
+p.variantes
+);
+
+html+=fila(
+"Nacimiento",
+p.nacimiento ?
+fechaBonita(p.nacimiento):""
+);
+
+html+=fila(
+"Lugar nacimiento",
+p.lugarNacimiento
+);
+
+html+=fila(
+"Bautismo",
+p.bautismo ?
+fechaBonita(p.bautismo):""
+);
+
+html+=fila(
+"Lugar bautismo",
+p.lugarBautismo
+);
+
+html+=fila(
+"Matrimonio",
+p.matrimonio ?
+fechaBonita(p.matrimonio):""
+);
+
+html+=fila(
+"Lugar matrimonio",
+p.lugarMatrimonio
+);
+
+html+=fila(
+"Defunción",
+p.defuncion ?
+fechaBonita(p.defuncion):""
+);
+
+html+=fila(
+"Lugar defunción",
+p.lugarDefuncion
+);
+
+html+=fila(
+"Profesión",
+p.profesion
+);
+
+html+=fila(
+"Residencia",
+p.residencia
+);
+
+html+=fila(
+"Padre",
+padre ?
+nombrePersona(padre):""
+);
+
+html+=fila(
+"Madre",
+madre ?
+nombrePersona(madre):""
+);
+
+html+=fila(
+"Cónyuge",
+conyuge ?
+nombrePersona(conyuge):""
+);
+
+html+=fila(
+"Certeza",
+p.certeza
+);
+
+html+=fila(
+"Notas",
+p.notas
+);
+
+
+document.getElementById("fichaContenido")
+.innerHTML=html;
+
+
+document.getElementById("fichaEditar")
+.onclick=function(){
+
+cerrarFicha();
+
+editar(id);
+
+};
+
+
+document.getElementById("personaModal")
+.classList.add("show");
+
+}
+
+
+function cerrarFicha(){
+
+document.getElementById("personaModal")
+.classList.remove("show");
+
+}
+
+
+/* =====================================================
+   ÁRBOL GENEALÓGICO
+===================================================== */
+
+function cajaArbol(
+p,
+clase="",
+relacion=""
+){
+
+if(!p){
+
+return `
+<div class="tree-empty">
+Sin datos
+</div>
+`;
+
+}
+
+return `
+
+<div
+class="tree-box ${clase}"
+onclick="verFicha('${p.id}')"
+>
+
+<div class="tree-name">
+${nombrePersona(p)}
+</div>
+
+<div class="tree-date">
+
+${
+p.nacimiento
+?
+fechaBonita(p.nacimiento)
+:
+"Fecha desconocida"
+}
+
+${
+p.lugarNacimiento
+?
+" · "+p.lugarNacimiento
+:
+""
+}
+
+</div>
+
+${
+relacion
+?
+`<div class="tree-relation">${relacion}</div>`
+:
+""
+}
+
+</div>
+
+`;
+
+}
+
+
+/*
+Construye la ascendencia completa disponible.
+Cada generación se calcula hacia atrás.
+Además muestra el cónyuge de la persona principal
+y de cada generación cuando está disponible.
+*/
+
+function construirAscendencia(id){
+
+const resultado=[];
+
+let actuales=[persona(id)];
+
+const usados=new Set();
+
+for(
+let generacion=0;
+generacion<10;
+generacion++
+){
+
+actuales=
+actuales.filter(Boolean);
+
+if(!actuales.length)
+break;
+
+resultado.push(actuales);
+
+const siguientes=[];
+
+actuales.forEach(p=>{
+
+if(p.padre){
+
+const padre=persona(p.padre);
+
+if(padre && !usados.has(padre.id)){
+siguientes.push(padre);
+}
+
+}
+
+if(p.madre){
+
+const madre=persona(p.madre);
+
+if(madre && !usados.has(madre.id)){
+siguientes.push(madre);
+}
+
+}
+
+});
+
+actuales.forEach(p=>
+usados.add(p.id)
+);
+
+actuales=siguientes;
+
+}
+
+return resultado;
 
 }
 
 
 function dibujarArbol(){
 
-const id=
-document.getElementById("treeSelect").value;
+const select=
+document.getElementById("treeSelect");
 
 const cont=
 document.getElementById("tree");
 
+if(!select || !cont)return;
+
+let id=select.value;
+
+
+/*
+Al arrancar, Violeta será la persona principal.
+*/
+
+if(!id){
+
+const violeta=
+db.personas.find(p=>
+nombrePersona(p)==="Violeta Galache Rubio"
+);
+
+if(violeta){
+
+id=violeta.id;
+
+select.value=id;
+
+}
+
+}
+
+
 if(!id){
 
 cont.innerHTML=
-"<p class='muted'>Selecciona una persona.</p>";
+"<p class='muted'>No hay personas.</p>";
 
 return;
 
 }
 
 
-const p=persona(id);
+const principal=
+persona(id);
 
-if(!p)return;
-
-
-let html=
-`<div class="tree-row">
-${cajaArbol(p)}
-</div>`;
+if(!principal)return;
 
 
-const padre=persona(p.padre);
-const madre=persona(p.madre);
+let html="";
+
+html+=`
+
+<div class="tree-title">
+
+<h3>
+🌳 ${nombrePersona(principal)}
+</h3>
+
+<div class="muted">
+Pulsa sobre cualquier persona para ver su ficha completa
+</div>
+
+</div>
+
+`;
+
+
+/* =====================================================
+   PERSONA PRINCIPAL + CÓNYUGE
+===================================================== */
+
+html+=`
+
+<div class="tree-generation">
+
+<div class="tree-couple">
+
+${cajaArbol(
+principal,
+"main-person",
+"Persona principal"
+)}
+
+`;
+
+if(principal.conyuge){
+
+const conyuge=
+persona(principal.conyuge);
+
+if(conyuge){
+
+html+=`
+
+<div class="tree-marriage">
+❤
+</div>
+
+${cajaArbol(
+conyuge,
+"spouse",
+"Cónyuge"
+)}
+
+`;
+
+}
+
+}
+
+html+=`
+
+</div>
+
+</div>
+`;
+
+
+/* =====================================================
+   PADRES
+===================================================== */
+
+const padre=
+persona(principal.padre);
+
+const madre=
+persona(principal.madre);
 
 
 if(padre || madre){
 
 html+=`
 
-<div class="tree-row">
+<div class="tree-connector"></div>
 
-${cajaArbol(padre)}
-${cajaArbol(madre)}
+<div class="tree-generation">
+
+<div class="tree-couple">
+
+${cajaArbol(
+padre,
+"",
+"Padre"
+)}
+
+<div class="tree-marriage">
+❤
+</div>
+
+${cajaArbol(
+madre,
+"",
+"Madre"
+)}
+
+</div>
 
 </div>
 
@@ -1935,38 +3015,87 @@ ${cajaArbol(madre)}
 }
 
 
-let abuelos=[];
+/* =====================================================
+   ASCENDENCIA COMPLETA
+===================================================== */
+
+const generaciones=
+construirAscendencia(id);
 
 
-if(padre){
+/*
+Empezamos en generación 1 porque
+la 0 es la persona principal.
+*/
 
-const a=persona(padre.padre);
-const b=persona(padre.madre);
+for(
+let g=1;
+g<generaciones.length;
+g++
+){
 
-if(a)abuelos.push(a);
-if(b)abuelos.push(b);
+const personasGen=
+generaciones[g];
 
-}
+if(!personasGen.length)
+continue;
 
-
-if(madre){
-
-const a=persona(madre.padre);
-const b=persona(madre.madre);
-
-if(a)abuelos.push(a);
-if(b)abuelos.push(b);
-
-}
-
-
-if(abuelos.length){
 
 html+=`
 
-<div class="tree-row">
+<div class="tree-connector"></div>
 
-${abuelos.map(cajaArbol).join("")}
+<div class="tree-generation">
+
+`;
+
+
+personasGen.forEach(p=>{
+
+html+=cajaArbol(
+p,
+"",
+g===1 ?
+"Padre / Madre":
+"Ascendiente"
+);
+
+
+/*
+Si tiene cónyuge y todavía no forma parte
+de la generación calculada, se muestra.
+*/
+
+if(p.conyuge){
+
+const c=
+persona(p.conyuge);
+
+if(c &&
+!personasGen.some(x=>x.id===c.id)){
+
+html+=`
+
+<div class="tree-marriage">
+❤
+</div>
+
+`;
+
+html+=cajaArbol(
+c,
+"spouse",
+"Cónyuge"
+);
+
+}
+
+}
+
+});
+
+
+html+=`
 
 </div>
 
@@ -1974,6 +3103,37 @@ ${abuelos.map(cajaArbol).join("")}
 
 }
 
+
+/* =====================================================
+   LEYENDA
+===================================================== */
+
+html+=`
+
+<div class="tree-legend">
+
+<span>👆 Pulsar = ficha completa</span>
+
+<span>❤ Cónyuge</span>
+
+<span>🟢 Confirmado</span>
+
+<span>🟡 Probable</span>
+
+<span>🟣 Hipótesis</span>
+
+</div>
+
+<div class="tree-note">
+
+<strong>Importante:</strong>
+El árbol solo enlaza las relaciones que están
+registradas en Antepasados. Las conexiones todavía
+no demostradas no se inventan.
+
+</div>
+
+`;
 
 cont.innerHTML=html;
 
@@ -1987,12 +3147,16 @@ cont.innerHTML=html;
 function guardarInvestigacion(){
 
 const titulo=
-document.getElementById("tituloInvestigacion")
+document.getElementById(
+"tituloInvestigacion"
+)
 .value.trim();
 
 if(!titulo){
 
-alert("Introduce un título.");
+alert(
+"Introduce un título."
+);
 
 return;
 
@@ -2004,23 +3168,34 @@ db.investigaciones.unshift({
 id:idNuevo(),
 
 fecha:
-document.getElementById("fechaInvestigacion").value,
+document.getElementById(
+"fechaInvestigacion"
+).value,
 
 titulo:titulo,
 
 texto:
-document.getElementById("textoInvestigacion").value.trim(),
+document.getElementById(
+"textoInvestigacion"
+).value.trim(),
 
 resultado:
-document.getElementById("resultadoInvestigacion").value
+document.getElementById(
+"resultadoInvestigacion"
+).value
 
 });
 
 
 guardarDB();
 
-document.getElementById("tituloInvestigacion").value="";
-document.getElementById("textoInvestigacion").value="";
+document.getElementById(
+"tituloInvestigacion"
+).value="";
+
+document.getElementById(
+"textoInvestigacion"
+).value="";
 
 mostrarInvestigaciones();
 
@@ -2030,7 +3205,11 @@ mostrarInvestigaciones();
 function mostrarInvestigaciones(){
 
 const cont=
-document.getElementById("investigaciones");
+document.getElementById(
+"investigaciones"
+);
+
+if(!cont)return;
 
 cont.innerHTML="";
 
@@ -2041,13 +3220,25 @@ cont.innerHTML+=`
 
 <div class="item">
 
-<strong>${i.titulo}</strong>
+<strong>
+${i.titulo}
+</strong>
 
 <div class="muted">
-${i.fecha||""} · ${i.resultado||""}
+
+${i.fecha ?
+fechaBonita(i.fecha):
+""}
+
+ ·
+
+${i.resultado||""}
+
 </div>
 
-<p>${i.texto||""}</p>
+<p>
+${i.texto||""}
+</p>
 
 </div>
 
@@ -2065,12 +3256,16 @@ ${i.fecha||""} · ${i.resultado||""}
 function guardarFuente(){
 
 const titulo=
-document.getElementById("fuenteTitulo")
+document.getElementById(
+"fuenteTitulo"
+)
 .value.trim();
 
 if(!titulo){
 
-alert("Introduce una descripción.");
+alert(
+"Introduce una descripción."
+);
 
 return;
 
@@ -2084,30 +3279,54 @@ id:idNuevo(),
 titulo:titulo,
 
 tipo:
-document.getElementById("fuenteTipo").value,
+document.getElementById(
+"fuenteTipo"
+).value,
 
 fecha:
-document.getElementById("fuenteFecha").value,
+document.getElementById(
+"fuenteFecha"
+).value,
 
 lugar:
-document.getElementById("fuenteLugar").value.trim(),
+document.getElementById(
+"fuenteLugar"
+).value.trim(),
 
 url:
-document.getElementById("fuenteUrl").value.trim(),
+document.getElementById(
+"fuenteUrl"
+).value.trim(),
 
 notas:
-document.getElementById("fuenteNotas").value.trim()
+document.getElementById(
+"fuenteNotas"
+).value.trim()
 
 });
 
 
 guardarDB();
 
-document.getElementById("fuenteTitulo").value="";
-document.getElementById("fuenteFecha").value="";
-document.getElementById("fuenteLugar").value="";
-document.getElementById("fuenteUrl").value="";
-document.getElementById("fuenteNotas").value="";
+document.getElementById(
+"fuenteTitulo"
+).value="";
+
+document.getElementById(
+"fuenteFecha"
+).value="";
+
+document.getElementById(
+"fuenteLugar"
+).value="";
+
+document.getElementById(
+"fuenteUrl"
+).value="";
+
+document.getElementById(
+"fuenteNotas"
+).value="";
 
 mostrarFuentes();
 
@@ -2117,7 +3336,11 @@ mostrarFuentes();
 function mostrarFuentes(){
 
 const cont=
-document.getElementById("fuentesLista");
+document.getElementById(
+"fuentesLista"
+);
+
+if(!cont)return;
 
 cont.innerHTML="";
 
@@ -2128,13 +3351,21 @@ cont.innerHTML+=`
 
 <div class="item">
 
-<strong>${f.titulo}</strong>
+<strong>
+${f.titulo}
+</strong>
 
 <div class="muted">
 
 ${f.tipo||""}
-${f.fecha ? " · "+f.fecha : ""}
-${f.lugar ? " · "+f.lugar : ""}
+
+${f.fecha ?
+" · "+fechaBonita(f.fecha):
+""}
+
+${f.lugar ?
+" · "+f.lugar:
+""}
 
 </div>
 
@@ -2148,10 +3379,13 @@ style="color:#55aaff">
 Abrir referencia
 </a>
 </p>`
-:""
+:
+""
 }
 
-<p>${f.notas||""}</p>
+<p>
+${f.notas||""}
+</p>
 
 </div>
 
@@ -2169,7 +3403,11 @@ Abrir referencia
 function exportar(){
 
 const datos=
-JSON.stringify(db,null,2);
+JSON.stringify(
+db,
+null,
+2
+);
 
 const blob=
 new Blob(
@@ -2210,11 +3448,15 @@ lector.onload=function(){
 try{
 
 const datos=
-JSON.parse(lector.result);
+JSON.parse(
+lector.result
+);
 
 if(!datos.personas){
 
-alert("Archivo no válido.");
+alert(
+"Archivo no válido."
+);
 
 return;
 
@@ -2234,11 +3476,15 @@ guardarDB();
 
 actualizarTodo();
 
-alert("Copia importada correctamente.");
+alert(
+"Copia importada correctamente."
+);
 
 }catch(e){
 
-alert("No se pudo importar el archivo.");
+alert(
+"No se pudo importar el archivo."
+);
 
 }
 
@@ -2333,16 +3579,46 @@ mostrarFuentes();
 
 dibujarArbol();
 
-document.getElementById("numPeople")
-.textContent=db.personas.length;
+document.getElementById(
+"numPeople"
+).textContent=
+db.personas.length;
 
-document.getElementById("numSources")
-.textContent=db.fuentes.length;
+document.getElementById(
+"numSources"
+).textContent=
+db.fuentes.length;
 
-document.getElementById("numResearch")
-.textContent=db.investigaciones.length;
+document.getElementById(
+"numResearch"
+).textContent=
+db.investigaciones.length;
 
 }
+
+
+/* =====================================================
+   CERRAR MODALES AL PULSAR FUERA
+===================================================== */
+
+document.addEventListener(
+"click",
+function(e){
+
+const modal=
+document.getElementById("modal");
+
+const ficha=
+document.getElementById("personaModal");
+
+if(e.target===modal)
+cerrarModal();
+
+if(e.target===ficha)
+cerrarFicha();
+
+}
+);
 
 
 /* =====================================================
@@ -2355,9 +3631,32 @@ function(){
 
 cargarDB();
 
+mostrarEscudo();
+
 actualizarSelectores();
 
 actualizarTodo();
+
+
+/*
+Seleccionar automáticamente Violeta
+*/
+
+const violeta=
+db.personas.find(
+p=>nombrePersona(p)==="Violeta Galache Rubio"
+);
+
+if(violeta){
+
+document.getElementById(
+"treeSelect"
+).value=violeta.id;
+
+dibujarArbol();
+
+}
+
 
 document.getElementById(
 "fechaInvestigacion"
