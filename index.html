@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<title>Antepasados - GALACHE</title>
+<title>GALACHE - Árbol Genealógico Familiar</title>
 
 <style>
 
@@ -76,12 +76,15 @@ button{
 .header-top{
   display:flex;
   align-items:center;
+  justify-content:center;
   gap:15px;
+  flex-direction:column;
+  text-align:center;
 }
 
 .escudo{
-  width:62px;
-  height:62px;
+  width:82px;
+  height:82px;
   border-radius:50%;
   border:2px solid var(--gold);
   display:flex;
@@ -100,22 +103,19 @@ button{
 
 .escudo-default{
   color:var(--gold);
-  font-size:28px;
-}
-
-.header-title{
-  flex:1;
+  font-size:38px;
+  font-weight:bold;
 }
 
 .header-title h1{
   margin:0;
   color:var(--gold2);
-  font-size:28px;
-  letter-spacing:2px;
+  font-size:30px;
+  letter-spacing:3px;
 }
 
 .header-note{
-  margin-top:5px;
+  margin-top:6px;
   color:var(--muted);
   font-size:14px;
 }
@@ -267,6 +267,11 @@ button{
   border:2px solid var(--gold);
 }
 
+.person-card.current{
+  border:2px solid var(--gold2);
+  box-shadow:0 0 0 1px rgba(216,179,106,.15);
+}
+
 .person-name{
   color:var(--text);
   font-size:17px;
@@ -356,6 +361,10 @@ button{
 
 .persona-item.galache-item{
   border-left:3px solid var(--gold);
+}
+
+.persona-item.current-item{
+  border-left:3px solid var(--gold2);
 }
 
 .persona-item .actions{
@@ -588,8 +597,13 @@ button{
     padding:14px;
   }
 
+  .escudo{
+    width:72px;
+    height:72px;
+  }
+
   .header-title h1{
-    font-size:22px;
+    font-size:24px;
   }
 
   .form-grid{
@@ -637,7 +651,7 @@ button{
       <h1>GALACHE</h1>
 
       <div class="header-note">
-        Antepasados · Árbol genealógico familiar
+        Árbol Genealógico Familiar
       </div>
 
     </div>
@@ -678,7 +692,7 @@ button{
 
   <div class="tree-header">
 
-    <h2>Árbol GALACHE</h2>
+    <h2>Árbol familiar</h2>
 
     <button class="btn gold" onclick="nuevaPersona(true)">
       + Añadir antepasado
@@ -1051,7 +1065,7 @@ button{
 ========================================================= */
 
 const STORAGE_KEY =
-  "antepasados_galache_v5";
+  "antepasados_galache_v6";
 
 const SHIELD_KEY =
   "antepasados_galache_escudo";
@@ -1129,7 +1143,6 @@ function buscarPersonaNombre(nombre){
 
 function crearDatosIniciales(){
 
-
   const personas = [];
 
 
@@ -1138,9 +1151,6 @@ function crearDatosIniciales(){
     apellidos,
     nacimiento,
     lugar,
-    padre,
-    madre,
-    conyuge,
     certeza,
     notas=""
   ){
@@ -1164,7 +1174,7 @@ function crearDatosIniciales(){
       madre:null,
       conyuge:null,
 
-      certeza:certeza || "Documentado",
+      certeza:certeza || "Pendiente",
 
       residencia:"",
 
@@ -1183,6 +1193,44 @@ function crearDatosIniciales(){
 
   /* =====================================================
      GENERACIÓN 1
+     PERSONA ACTUAL
+  ===================================================== */
+
+  const joseAntonio =
+    persona(
+      "José Antonio",
+      "Vázquez Galache",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  joseAntonio.principal = true;
+
+
+  const mariaJesus =
+    persona(
+      "María Jesús",
+      "Ruiz Montilla",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  mariaJesus.principal = true;
+
+
+  joseAntonio.conyuge =
+    mariaJesus.id;
+
+  mariaJesus.conyuge =
+    joseAntonio.id;
+
+
+  /* =====================================================
+     GENERACIÓN 2
   ===================================================== */
 
   const violeta =
@@ -1191,11 +1239,11 @@ function crearDatosIniciales(){
       "Galache Rubio",
       "28/08/1927",
       "Genalguacil (Málaga)",
-      null,
-      null,
-      null,
       "Documentado"
     );
+
+
+  violeta.principal = true;
 
 
   const placido =
@@ -1204,19 +1252,29 @@ function crearDatosIniciales(){
       "Vázquez Martínez",
       "",
       "",
-      null,
-      null,
-      violeta.id,
       "Documentado"
     );
+
+
+  placido.principal = true;
 
 
   violeta.conyuge =
     placido.id;
 
+  placido.conyuge =
+    violeta.id;
+
+
+  joseAntonio.padre =
+    placido.id;
+
+  joseAntonio.madre =
+    violeta.id;
+
 
   /* =====================================================
-     GENERACIÓN 2
+     GENERACIÓN 3
   ===================================================== */
 
   const pedroRomero =
@@ -1225,11 +1283,11 @@ function crearDatosIniciales(){
       "Galache Romero",
       "29/06/1897",
       "Genalguacil (Málaga)",
-      null,
-      null,
-      null,
       "Documentado"
     );
+
+
+  pedroRomero.principal = true;
 
 
   const francisca =
@@ -1238,15 +1296,18 @@ function crearDatosIniciales(){
       "Rubio Rubio",
       "",
       "",
-      null,
-      null,
-      pedroRomero.id,
       "Documentado"
     );
 
 
+  francisca.principal = true;
+
+
   pedroRomero.conyuge =
     francisca.id;
+
+  francisca.conyuge =
+    pedroRomero.id;
 
 
   violeta.padre =
@@ -1257,7 +1318,7 @@ function crearDatosIniciales(){
 
 
   /* =====================================================
-     GENERACIÓN 3
+     GENERACIÓN 4
   ===================================================== */
 
   const pedroAyres =
@@ -1266,12 +1327,11 @@ function crearDatosIniciales(){
       "Galache Ayres",
       "31/01/1856",
       "Villavieja de Yeltes (Salamanca)",
-      null,
-      null,
-      null,
       "Documentado"
     );
 
+
+  pedroAyres.principal = true;
 
   pedroAyres.variantes =
     "Airez / Aire";
@@ -1283,15 +1343,18 @@ function crearDatosIniciales(){
       "Romero Sánchez",
       "1862",
       "Genalguacil (Málaga)",
-      null,
-      null,
-      pedroAyres.id,
       "Documentado"
     );
 
 
+  isabel.principal = true;
+
+
   pedroAyres.conyuge =
     isabel.id;
+
+  isabel.conyuge =
+    pedroAyres.id;
 
 
   pedroRomero.padre =
@@ -1302,7 +1365,7 @@ function crearDatosIniciales(){
 
 
   /* =====================================================
-     GENERACIÓN 4
+     GENERACIÓN 5
   ===================================================== */
 
   const celestino =
@@ -1311,11 +1374,11 @@ function crearDatosIniciales(){
       "Galache García",
       "",
       "",
-      null,
-      null,
-      null,
       "Documentado"
     );
+
+
+  celestino.principal = true;
 
 
   const teodora =
@@ -1324,15 +1387,18 @@ function crearDatosIniciales(){
       "Ayres",
       "",
       "",
-      null,
-      null,
-      celestino.id,
       "Documentado"
     );
 
 
+  teodora.principal = true;
+
+
   celestino.conyuge =
     teodora.id;
+
+  teodora.conyuge =
+    celestino.id;
 
 
   pedroAyres.padre =
@@ -1343,7 +1409,7 @@ function crearDatosIniciales(){
 
 
   /* =====================================================
-     GENERACIÓN 5
+     GENERACIÓN 6
   ===================================================== */
 
   const santiago =
@@ -1352,11 +1418,11 @@ function crearDatosIniciales(){
       "Galache García",
       "",
       "",
-      null,
-      null,
-      null,
       "Documentado"
     );
+
+
+  santiago.principal = true;
 
 
   const florentina =
@@ -1365,15 +1431,18 @@ function crearDatosIniciales(){
       "García",
       "",
       "",
-      null,
-      null,
-      santiago.id,
       "Documentado"
     );
 
 
+  florentina.principal = true;
+
+
   santiago.conyuge =
     florentina.id;
+
+  florentina.conyuge =
+    santiago.id;
 
 
   celestino.padre =
@@ -1384,7 +1453,7 @@ function crearDatosIniciales(){
 
 
   /* =====================================================
-     GENERACIÓN 6
+     GENERACIÓN 7
   ===================================================== */
 
   const joseph =
@@ -1393,11 +1462,11 @@ function crearDatosIniciales(){
       "Galache Melgar",
       "",
       "",
-      null,
-      null,
-      null,
       "Documentado"
     );
+
+
+  joseph.principal = true;
 
 
   const josefa =
@@ -1406,15 +1475,18 @@ function crearDatosIniciales(){
       "García Paradinas",
       "",
       "",
-      null,
-      null,
-      joseph.id,
       "Documentado"
     );
 
 
+  josefa.principal = true;
+
+
   joseph.conyuge =
     josefa.id;
+
+  josefa.conyuge =
+    joseph.id;
 
 
   santiago.padre =
@@ -1425,7 +1497,7 @@ function crearDatosIniciales(){
 
 
   /* =====================================================
-     GENERACIÓN 7
+     GENERACIÓN 8
   ===================================================== */
 
   const francisco =
@@ -1434,12 +1506,12 @@ function crearDatosIniciales(){
       "Galache Fraile",
       "1705",
       "Ituero de Huebra (Salamanca)",
-      null,
-      null,
-      null,
       "Documentado",
       "Hijo legítimo de Francisco Galache y María Fraile."
     );
+
+
+  francisco.principal = true;
 
 
   const maria =
@@ -1448,15 +1520,18 @@ function crearDatosIniciales(){
       "Melgar",
       "",
       "",
-      null,
-      null,
-      francisco.id,
       "Documentado"
     );
 
 
+  maria.principal = true;
+
+
   francisco.conyuge =
     maria.id;
+
+  maria.conyuge =
+    francisco.id;
 
 
   joseph.padre =
@@ -1466,7 +1541,8 @@ function crearDatosIniciales(){
     maria.id;
 
 
-  db.personas = personas;
+  db.personas =
+    personas;
 
 
   guardar();
@@ -1531,7 +1607,7 @@ function normalizarPersonas(){
       p.notas || "";
 
     p.principal =
-      p.principal || false;
+      !!p.principal;
 
   });
 
@@ -1572,15 +1648,6 @@ function cargar(){
         JSON.parse(raw);
 
       normalizarPersonas();
-
-
-      /*
-       Si la copia anterior contiene personas
-       que ya no forman parte del árbol principal,
-       NO se eliminan automáticamente.
-       Se mantienen en Personas para evitar pérdida
-       de información.
-      */
 
     }catch(e){
 
@@ -1665,7 +1732,7 @@ document
 
 
 /* =========================================================
-   TARJETA DE PERSONA
+   TARJETA PERSONA
 ========================================================= */
 
 function tarjetaPersona(
@@ -1795,15 +1862,15 @@ function tarjetaPersona(
 
 
 /* =========================================================
-   GENERACIÓN DEL ÁRBOL
+   GENERACIÓN
 ========================================================= */
 
 function dibujarGeneracion(
   html,
-  numero,
   titulo,
   persona,
-  conyuge
+  conyuge,
+  clasePersona=""
 ){
 
   html.push(`
@@ -1824,7 +1891,7 @@ function dibujarGeneracion(
     html.push(
       tarjetaPersona(
         persona,
-        "galache male"
+        `galache male ${clasePersona}`
       )
     );
 
@@ -1836,7 +1903,7 @@ function dibujarGeneracion(
     html.push(
       tarjetaPersona(
         conyuge,
-        "female"
+        `female ${clasePersona}`
       )
     );
 
@@ -1854,6 +1921,10 @@ function dibujarGeneracion(
 }
 
 
+/* =========================================================
+   ÁRBOL PRINCIPAL
+========================================================= */
+
 function dibujarArbol(){
 
   const cont =
@@ -1861,6 +1932,17 @@ function dibujarArbol(){
 
 
   if(!cont) return;
+
+
+  const joseAntonio =
+    buscarPersonaNombre(
+      "José Antonio Vázquez Galache"
+    );
+
+  const mariaJesus =
+    buscarPersonaNombre(
+      "María Jesús Ruiz Montilla"
+    );
 
 
   const violeta =
@@ -1943,10 +2025,31 @@ function dibujarArbol(){
   let html = [];
 
 
+  /* =====================================================
+     GENERACIÓN 1 — ACTUAL
+  ===================================================== */
+
   dibujarGeneracion(
     html,
-    1,
-    "Generación 1 · Violeta",
+    "Generación 1 · José Antonio",
+    joseAntonio,
+    mariaJesus,
+    "current"
+  );
+
+
+  html.push(
+    `<div class="connector"></div>`
+  );
+
+
+  /* =====================================================
+     GENERACIÓN 2
+  ===================================================== */
+
+  dibujarGeneracion(
+    html,
+    "Generación 2 · Padres",
     violeta,
     placido
   );
@@ -1957,10 +2060,13 @@ function dibujarArbol(){
   );
 
 
+  /* =====================================================
+     GENERACIÓN 3
+  ===================================================== */
+
   dibujarGeneracion(
     html,
-    2,
-    "Generación 2",
+    "Generación 3",
     pedroRomero,
     francisca
   );
@@ -1971,10 +2077,13 @@ function dibujarArbol(){
   );
 
 
+  /* =====================================================
+     GENERACIÓN 4
+  ===================================================== */
+
   dibujarGeneracion(
     html,
-    3,
-    "Generación 3",
+    "Generación 4",
     pedroAyres,
     isabel
   );
@@ -1985,10 +2094,13 @@ function dibujarArbol(){
   );
 
 
+  /* =====================================================
+     GENERACIÓN 5
+  ===================================================== */
+
   dibujarGeneracion(
     html,
-    4,
-    "Generación 4",
+    "Generación 5",
     celestino,
     teodora
   );
@@ -1999,10 +2111,13 @@ function dibujarArbol(){
   );
 
 
+  /* =====================================================
+     GENERACIÓN 6
+  ===================================================== */
+
   dibujarGeneracion(
     html,
-    5,
-    "Generación 5",
+    "Generación 6",
     santiago,
     florentina
   );
@@ -2013,10 +2128,13 @@ function dibujarArbol(){
   );
 
 
+  /* =====================================================
+     GENERACIÓN 7
+  ===================================================== */
+
   dibujarGeneracion(
     html,
-    6,
-    "Generación 6",
+    "Generación 7",
     joseph,
     josefa
   );
@@ -2027,14 +2145,21 @@ function dibujarArbol(){
   );
 
 
+  /* =====================================================
+     GENERACIÓN 8
+  ===================================================== */
+
   dibujarGeneracion(
     html,
-    7,
-    "Generación 7 · Inicio documentado actual",
+    "Generación 8 · Inicio documentado actual",
     francisco,
     maria
   );
 
+
+  /* =====================================================
+     AÑADIR ANTEPASADOS
+  ===================================================== */
 
   html.push(`
 
@@ -2116,6 +2241,10 @@ function dibujarPersonas(){
         persona-item
         ${p.apellidos.includes("Galache")
           ? "galache-item"
+          : ""}
+        ${nombreCompleto(p) ===
+          "José Antonio Vázquez Galache"
+          ? "current-item"
           : ""}
       ">
 
@@ -2209,30 +2338,21 @@ function dibujarPersonas(){
 }
 
 
+/* =========================================================
+   PERSONAS PRINCIPALES
+========================================================= */
+
 function esPersonaPrincipal(p){
 
-  const nombres = [
+  if(!p) return false;
 
-    "Violeta Galache Rubio",
-    "Pedro Galache Romero",
-    "Pedro Galache Ayres",
-    "Celestino Galache García",
-    "Santiago Galache García",
-    "Joseph Galache Melgar",
-    "Francisco Galache Fraile"
-
-  ];
-
-
-  return nombres.includes(
-    nombreCompleto(p)
-  );
+  return !!p.principal;
 
 }
 
 
 /* =========================================================
-   FICHA DE PERSONA
+   DETALLE
 ========================================================= */
 
 function mostrarDetalle(id){
@@ -2358,36 +2478,34 @@ function mostrarDetalle(id){
       </div>
 
 
-      ${
-        p.matrimonio
-        ? `
-          <div class="detail-row">
-            <span class="detail-label">
-              💒 Matrimonio
-            </span><br>
-            <span class="detail-value">
-              ${esc(p.matrimonio)}
-            </span>
-          </div>
-        `
-        : ""
-      }
+      <div class="detail-row">
+        <span class="detail-label">
+          💒 Matrimonio
+        </span><br>
+        <span class="detail-value">
+          ${esc(p.matrimonio || "—")}
+        </span>
+      </div>
 
 
-      ${
-        p.matrimonioLugar
-        ? `
-          <div class="detail-row">
-            <span class="detail-label">
-              📍 Lugar matrimonio
-            </span><br>
-            <span class="detail-value">
-              ${esc(p.matrimonioLugar)}
-            </span>
-          </div>
-        `
-        : ""
-      }
+      <div class="detail-row">
+        <span class="detail-label">
+          📍 Lugar matrimonio
+        </span><br>
+        <span class="detail-value">
+          ${esc(p.matrimonioLugar || "—")}
+        </span>
+      </div>
+
+
+      <div class="detail-row">
+        <span class="detail-label">
+          📜 Estado
+        </span><br>
+        <span class="detail-value">
+          ${esc(p.certeza || "—")}
+        </span>
+      </div>
 
 
       ${
@@ -2404,16 +2522,6 @@ function mostrarDetalle(id){
         `
         : ""
       }
-
-
-      <div class="detail-row">
-        <span class="detail-label">
-          📜 Estado
-        </span><br>
-        <span class="detail-value">
-          ${esc(p.certeza)}
-        </span>
-      </div>
 
 
       ${
@@ -2510,19 +2618,6 @@ function nuevaPersona(
 
 
   cargarSelectPersonas();
-
-
-  if(antepasado && hijoId){
-
-    document.getElementById(
-      "fPadre"
-    ).value = "";
-
-    document.getElementById(
-      "fMadre"
-    ).value = "";
-
-  }
 
 
   document.getElementById(
@@ -2763,7 +2858,8 @@ document
       }else{
 
         p = {
-          id:uid()
+          id:uid(),
+          principal:false
         };
 
         db.personas.push(p);
