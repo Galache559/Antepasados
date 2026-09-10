@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -957,47 +956,50 @@ button{
       </div>
 
 
+      <!-- =================================================
+           CAMBIO: PADRE = TEXTO LIBRE
+      ================================================= -->
+
       <div class="field">
 
         <label>Padre</label>
 
-        <select id="fPadre">
-
-          <option value="">
-            — Sin asignar —
-          </option>
-
-        </select>
+        <input
+          id="fPadre"
+          type="text"
+          placeholder="Escribe el nombre del padre">
 
       </div>
 
+
+      <!-- =================================================
+           CAMBIO: MADRE = TEXTO LIBRE
+      ================================================= -->
 
       <div class="field">
 
         <label>Madre</label>
 
-        <select id="fMadre">
-
-          <option value="">
-            — Sin asignar —
-          </option>
-
-        </select>
+        <input
+          id="fMadre"
+          type="text"
+          placeholder="Escribe el nombre de la madre">
 
       </div>
 
+
+      <!-- =================================================
+           CAMBIO: CÓNYUGE = TEXTO LIBRE
+      ================================================= -->
 
       <div class="field">
 
         <label>Cónyuge</label>
 
-        <select id="fConyuge">
-
-          <option value="">
-            — Sin asignar —
-          </option>
-
-        </select>
+        <input
+          id="fConyuge"
+          type="text"
+          placeholder="Escribe el nombre del cónyuge">
 
       </div>
 
@@ -1170,9 +1172,9 @@ function crearDatosIniciales(){
       matrimonio:"",
       matrimonioLugar:"",
 
-      padre:null,
-      madre:null,
-      conyuge:null,
+      padre:"",
+      madre:"",
+      conyuge:"",
 
       certeza:certeza || "Pendiente",
 
@@ -1223,10 +1225,10 @@ function crearDatosIniciales(){
 
 
   joseAntonio.conyuge =
-    mariaJesus.id;
+    nombreCompleto(mariaJesus);
 
   mariaJesus.conyuge =
-    joseAntonio.id;
+    nombreCompleto(joseAntonio);
 
 
   /* =====================================================
@@ -1260,17 +1262,17 @@ function crearDatosIniciales(){
 
 
   violeta.conyuge =
-    placido.id;
+    nombreCompleto(placido);
 
   placido.conyuge =
-    violeta.id;
+    nombreCompleto(violeta);
 
 
   joseAntonio.padre =
-    placido.id;
+    nombreCompleto(placido);
 
   joseAntonio.madre =
-    violeta.id;
+    nombreCompleto(violeta);
 
 
   /* =====================================================
@@ -1304,17 +1306,17 @@ function crearDatosIniciales(){
 
 
   pedroRomero.conyuge =
-    francisca.id;
+    nombreCompleto(francisca);
 
   francisca.conyuge =
-    pedroRomero.id;
+    nombreCompleto(pedroRomero);
 
 
   violeta.padre =
-    pedroRomero.id;
+    nombreCompleto(pedroRomero);
 
   violeta.madre =
-    francisca.id;
+    nombreCompleto(francisca);
 
 
   /* =====================================================
@@ -1351,17 +1353,17 @@ function crearDatosIniciales(){
 
 
   pedroAyres.conyuge =
-    isabel.id;
+    nombreCompleto(isabel);
 
   isabel.conyuge =
-    pedroAyres.id;
+    nombreCompleto(pedroAyres);
 
 
   pedroRomero.padre =
-    pedroAyres.id;
+    nombreCompleto(pedroAyres);
 
   pedroRomero.madre =
-    isabel.id;
+    nombreCompleto(isabel);
 
 
   /* =====================================================
@@ -1395,17 +1397,17 @@ function crearDatosIniciales(){
 
 
   celestino.conyuge =
-    teodora.id;
+    nombreCompleto(teodora);
 
   teodora.conyuge =
-    celestino.id;
+    nombreCompleto(celestino);
 
 
   pedroAyres.padre =
-    celestino.id;
+    nombreCompleto(celestino);
 
   pedroAyres.madre =
-    teodora.id;
+    nombreCompleto(teodora);
 
 
   /* =====================================================
@@ -1439,17 +1441,17 @@ function crearDatosIniciales(){
 
 
   santiago.conyuge =
-    florentina.id;
+    nombreCompleto(florentina);
 
   florentina.conyuge =
-    santiago.id;
+    nombreCompleto(santiago);
 
 
   celestino.padre =
-    santiago.id;
+    nombreCompleto(santiago);
 
   celestino.madre =
-    florentina.id;
+    nombreCompleto(florentina);
 
 
   /* =====================================================
@@ -1483,17 +1485,17 @@ function crearDatosIniciales(){
 
 
   joseph.conyuge =
-    josefa.id;
+    nombreCompleto(josefa);
 
   josefa.conyuge =
-    joseph.id;
+    nombreCompleto(joseph);
 
 
   santiago.padre =
-    joseph.id;
+    nombreCompleto(joseph);
 
   santiago.madre =
-    josefa.id;
+    nombreCompleto(josefa);
 
 
   /* =====================================================
@@ -1528,17 +1530,17 @@ function crearDatosIniciales(){
 
 
   francisco.conyuge =
-    maria.id;
+    nombreCompleto(maria);
 
   maria.conyuge =
-    francisco.id;
+    nombreCompleto(francisco);
 
 
   joseph.padre =
-    francisco.id;
+    nombreCompleto(francisco);
 
   joseph.madre =
-    maria.id;
+    nombreCompleto(maria);
 
 
   db.personas =
@@ -1588,14 +1590,19 @@ function normalizarPersonas(){
     p.matrimonioLugar =
       p.matrimonioLugar || "";
 
+    /*
+       Padre, madre y cónyuge son ahora
+       campos de texto libre.
+    */
+
     p.padre =
-      p.padre || null;
+      p.padre || "";
 
     p.madre =
-      p.madre || null;
+      p.madre || "";
 
     p.conyuge =
-      p.conyuge || null;
+      p.conyuge || "";
 
     p.certeza =
       p.certeza || "Pendiente";
@@ -1792,46 +1799,36 @@ function tarjetaPersona(
   }
 
 
-  const padre =
-    getPersona(p.padre);
-
-  const madre =
-    getPersona(p.madre);
-
-  const conyuge =
-    getPersona(p.conyuge);
-
-
-  if(padre){
+  if(p.padre){
 
     html += `
       <div>
         <strong>👨 Padre:</strong>
-        ${esc(nombreCompleto(padre))}
+        ${esc(p.padre)}
       </div>
     `;
 
   }
 
 
-  if(madre){
+  if(p.madre){
 
     html += `
       <div>
         <strong>👩 Madre:</strong>
-        ${esc(nombreCompleto(madre))}
+        ${esc(p.madre)}
       </div>
     `;
 
   }
 
 
-  if(conyuge){
+  if(p.conyuge){
 
     html += `
       <div>
         <strong>💍 Cónyuge:</strong>
-        ${esc(nombreCompleto(conyuge))}
+        ${esc(p.conyuge)}
       </div>
     `;
 
@@ -2364,16 +2361,6 @@ function mostrarDetalle(id){
   if(!p) return;
 
 
-  const padre =
-    getPersona(p.padre);
-
-  const madre =
-    getPersona(p.madre);
-
-  const conyuge =
-    getPersona(p.conyuge);
-
-
   document.getElementById(
     "modalTitulo"
   ).textContent =
@@ -2442,9 +2429,7 @@ function mostrarDetalle(id){
         </span><br>
         <span class="detail-value">
           ${esc(
-            padre
-            ? nombreCompleto(padre)
-            : "—"
+            p.padre || "—"
           )}
         </span>
       </div>
@@ -2456,9 +2441,7 @@ function mostrarDetalle(id){
         </span><br>
         <span class="detail-value">
           ${esc(
-            madre
-            ? nombreCompleto(madre)
-            : "—"
+            p.madre || "—"
           )}
         </span>
       </div>
@@ -2470,9 +2453,7 @@ function mostrarDetalle(id){
         </span><br>
         <span class="detail-value">
           ${esc(
-            conyuge
-            ? nombreCompleto(conyuge)
-            : "—"
+            p.conyuge || "—"
           )}
         </span>
       </div>
@@ -2617,7 +2598,10 @@ function nuevaPersona(
   ).value = "";
 
 
-  cargarSelectPersonas();
+  /*
+     Ya no se cargan listas de personas.
+     Padre, Madre y Cónyuge son campos libres.
+  */
 
 
   document.getElementById(
@@ -2731,10 +2715,11 @@ function editarPersona(id){
     p.certeza || "Pendiente";
 
 
-  cargarSelectPersonas(
-    p.id
-  );
-
+  /*
+     Padre, Madre y Cónyuge:
+     ahora se recuperan directamente
+     como texto libre.
+  */
 
   document.getElementById(
     "fPadre"
@@ -2757,73 +2742,6 @@ function editarPersona(id){
   document.getElementById(
     "modal"
   ).classList.add("show");
-
-}
-
-
-/* =========================================================
-   SELECTS
-========================================================= */
-
-function cargarSelectPersonas(
-  excluirId=""
-){
-
-  const selects = [
-    "fPadre",
-    "fMadre",
-    "fConyuge"
-  ];
-
-
-  selects.forEach(id => {
-
-    const select =
-      document.getElementById(id);
-
-
-    select.innerHTML = `
-      <option value="">
-        — Sin asignar —
-      </option>
-    `;
-
-
-    db.personas
-      .filter(
-        p => p.id !== excluirId
-      )
-      .sort(
-        (a,b) =>
-          nombreCompleto(a)
-            .localeCompare(
-              nombreCompleto(b),
-              "es"
-            )
-      )
-      .forEach(p => {
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-
-        option.value =
-          p.id;
-
-
-        option.textContent =
-          nombreCompleto(p);
-
-
-        select.appendChild(
-          option
-        );
-
-      });
-
-  });
 
 }
 
@@ -2909,22 +2827,34 @@ document
         ).value.trim();
 
 
+      /*
+         Padre = texto libre
+      */
+
       p.padre =
         document.getElementById(
           "fPadre"
-        ).value || null;
+        ).value.trim();
 
+
+      /*
+         Madre = texto libre
+      */
 
       p.madre =
         document.getElementById(
           "fMadre"
-        ).value || null;
+        ).value.trim();
 
+
+      /*
+         Cónyuge = texto libre
+      */
 
       p.conyuge =
         document.getElementById(
           "fConyuge"
-        ).value || null;
+        ).value.trim();
 
 
       p.residencia =
@@ -3000,18 +2930,10 @@ function eliminarPersona(id){
     );
 
 
-  db.personas.forEach(x => {
-
-    if(x.padre === id)
-      x.padre = null;
-
-    if(x.madre === id)
-      x.madre = null;
-
-    if(x.conyuge === id)
-      x.conyuge = null;
-
-  });
+  /*
+     Al ser relaciones de texto,
+     no es necesario borrar referencias.
+  */
 
 
   guardar();
@@ -3255,4 +3177,3 @@ dibujarPersonas();
 
 </body>
 </html>
-```
