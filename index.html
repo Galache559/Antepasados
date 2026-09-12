@@ -804,17 +804,17 @@ button{
 
     <div class="backup-card">
 
-      <h3>Restaurar</h3>
+      <h3>Datos iniciales</h3>
 
       <p class="small">
-        Vuelve a los datos iniciales incluidos en la aplicación.
+        Restablece el árbol GALACHE inicial.
       </p>
 
       <button
         class="btn red"
         onclick="restaurarInicial()">
 
-        Restaurar datos iniciales
+        Restaurar iniciales
 
       </button>
 
@@ -832,44 +832,250 @@ button{
 
 
 <!-- =====================================================
-     MODAL
+     MODAL PERSONA
 ===================================================== -->
 
 <div id="modal" class="modal">
 
-  <div class="modal-box">
+<div class="modal-box">
 
-    <div class="modal-head">
+  <div class="modal-head">
 
-      <h2 id="modalTitle">
-        Persona
-      </h2>
+    <h2 id="modalTitulo">
+      Persona
+    </h2>
+
+    <button
+      class="close"
+      onclick="cerrarModal()">
+
+      ×
+
+    </button>
+
+  </div>
+
+
+  <form id="personaForm">
+
+    <input
+      type="hidden"
+      id="personaId">
+
+
+    <div class="form-grid">
+
+
+      <div class="field">
+
+        <label>Nombre</label>
+
+        <input
+          id="fNombre"
+          required>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Apellidos</label>
+
+        <input
+          id="fApellidos"
+          required>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Variantes del apellido</label>
+
+        <input id="fVariantes">
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Estado</label>
+
+        <select id="fCerteza">
+
+          <option value="Confirmado">
+            Confirmado
+          </option>
+
+          <option value="Documentado">
+            Documentado
+          </option>
+
+          <option value="Pendiente">
+            Pendiente
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Nacimiento</label>
+
+        <input id="fNacimiento">
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Lugar de nacimiento</label>
+
+        <input id="fNacimientoLugar">
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Matrimonio</label>
+
+        <input id="fMatrimonio">
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Lugar de matrimonio</label>
+
+        <input id="fMatrimonioLugar">
+
+      </div>
+
+
+      <!-- =================================================
+           CAMBIO: PADRE = TEXTO LIBRE
+      ================================================= -->
+
+      <div class="field">
+
+        <label>Padre</label>
+
+        <input
+          id="fPadre"
+          type="text"
+          placeholder="Escribe el nombre del padre">
+
+      </div>
+
+
+      <!-- =================================================
+           CAMBIO: MADRE = TEXTO LIBRE
+      ================================================= -->
+
+      <div class="field">
+
+        <label>Madre</label>
+
+        <input
+          id="fMadre"
+          type="text"
+          placeholder="Escribe el nombre de la madre">
+
+      </div>
+
+
+      <!-- =================================================
+           CAMBIO: CÓNYUGE = TEXTO LIBRE
+      ================================================= -->
+
+      <div class="field">
+
+        <label>Cónyuge</label>
+
+        <input
+          id="fConyuge"
+          type="text"
+          placeholder="Escribe el nombre del cónyuge">
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Hijos</label>
+
+        <textarea id="fHijos" placeholder="Un hijo por línea: Nombre | Fecha de nacimiento"></textarea>
+
+      </div>
+
+
+      <div class="field full">
+
+        <label>Notas</label>
+
+        <textarea id="fNotas"></textarea>
+
+      </div>
+
+
+    </div>
+
+
+    <div class="form-actions">
 
       <button
-        class="close"
+        type="submit"
+        class="btn gold">
+
+        Guardar persona
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn"
         onclick="cerrarModal()">
 
-        ×
+        Cancelar
 
       </button>
 
     </div>
 
 
-    <div id="modalContent"></div>
+  </form>
 
-  </div>
+</div>
 
 </div>
 
 
+<!-- =====================================================
+     SCRIPT
+===================================================== -->
+
 <script>
+
 
 /* =========================================================
    CONFIGURACIÓN
 ========================================================= */
 
-const STORAGE_KEY = "antepasados_galache_v6";
+const STORAGE_KEY =
+  "antepasados_galache_v6";
+
+const SHIELD_KEY =
+  "antepasados_galache_escudo";
+
+
+let db = {
+  personas:[]
+};
 
 
 /* =========================================================
@@ -881,14 +1087,16 @@ function uid(){
   return "p_" +
     Date.now().toString(36) +
     "_" +
-    Math.random().toString(36).slice(2,8);
+    Math.random()
+      .toString(36)
+      .slice(2,8);
 
 }
 
 
-function esc(text){
+function esc(v){
 
-  return String(text ?? "")
+  return String(v ?? "")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
@@ -898,12 +1106,524 @@ function esc(text){
 }
 
 
-function texto(valor){
+function nombreCompleto(p){
 
-  return valor == null ? "" : String(valor);
+  if(!p) return "";
+
+  return `${p.nombre || ""} ${p.apellidos || ""}`
+    .trim();
 
 }
 
+
+function getPersona(id){
+
+  if(!id) return null;
+
+  return db.personas.find(
+    p => p.id === id
+  ) || null;
+
+}
+
+
+function buscarPersonaNombre(nombre){
+
+  return db.personas.find(
+    p =>
+      nombreCompleto(p)
+        .toLowerCase() ===
+      nombre.toLowerCase()
+  ) || null;
+
+}
+
+
+/* =========================================================
+   DATOS INICIALES
+========================================================= */
+
+function crearDatosIniciales(){
+
+  const personas = [];
+
+
+  function persona(
+    nombre,
+    apellidos,
+    nacimiento,
+    lugar,
+    certeza,
+    notas=""
+  ){
+
+    const p = {
+
+      id:uid(),
+
+      nombre,
+      apellidos,
+
+      variantes:"",
+
+      nacimiento:nacimiento || "",
+      nacimientoLugar:lugar || "",
+
+      matrimonio:"",
+      matrimonioLugar:"",
+
+      padre:"",
+      madre:"",
+      conyuge:"",
+
+      certeza:certeza || "Pendiente",
+
+      hijos:"",
+
+      notas,
+
+      principal:false
+
+    };
+
+    personas.push(p);
+
+    return p;
+
+  }
+
+
+  /* =====================================================
+     GENERACIÓN 1
+     PERSONA ACTUAL
+  ===================================================== */
+
+  const joseAntonio =
+    persona(
+      "José Antonio",
+      "Vázquez Galache",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  joseAntonio.principal = true;
+
+
+  const mariaJesus =
+    persona(
+      "María Jesús",
+      "Ruiz Montilla",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  mariaJesus.principal = true;
+
+
+  joseAntonio.conyuge =
+    nombreCompleto(mariaJesus);
+
+  mariaJesus.conyuge =
+    nombreCompleto(joseAntonio);
+
+
+  /* =====================================================
+     GENERACIÓN 2
+  ===================================================== */
+
+  const violeta =
+    persona(
+      "Violeta",
+      "Galache Rubio",
+      "28/08/1927",
+      "Genalguacil (Málaga)",
+      "Documentado"
+    );
+
+
+  violeta.principal = true;
+
+
+  const placido =
+    persona(
+      "Plácido",
+      "Vázquez Martínez",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  placido.principal = true;
+
+
+  violeta.conyuge =
+    nombreCompleto(placido);
+
+  placido.conyuge =
+    nombreCompleto(violeta);
+
+
+  joseAntonio.padre =
+    nombreCompleto(placido);
+
+  joseAntonio.madre =
+    nombreCompleto(violeta);
+
+
+  /* =====================================================
+     GENERACIÓN 3
+  ===================================================== */
+
+  const pedroRomero =
+    persona(
+      "Pedro",
+      "Galache Romero",
+      "29/06/1897",
+      "Genalguacil (Málaga)",
+      "Documentado"
+    );
+
+
+  pedroRomero.principal = true;
+
+
+  const francisca =
+    persona(
+      "Francisca",
+      "Rubio Rubio",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  francisca.principal = true;
+
+
+  pedroRomero.conyuge =
+    nombreCompleto(francisca);
+
+  francisca.conyuge =
+    nombreCompleto(pedroRomero);
+
+
+  violeta.padre =
+    nombreCompleto(pedroRomero);
+
+  violeta.madre =
+    nombreCompleto(francisca);
+
+
+  /* =====================================================
+     GENERACIÓN 4
+  ===================================================== */
+
+  const pedroAyres =
+    persona(
+      "Pedro",
+      "Galache Ayres",
+      "31/01/1856",
+      "Villavieja de Yeltes (Salamanca)",
+      "Documentado"
+    );
+
+
+  pedroAyres.principal = true;
+
+  pedroAyres.variantes =
+    "Airez / Aire";
+
+
+  const isabel =
+    persona(
+      "Isabel",
+      "Romero Sánchez",
+      "1862",
+      "Genalguacil (Málaga)",
+      "Documentado"
+    );
+
+
+  isabel.principal = true;
+
+
+  pedroAyres.conyuge =
+    nombreCompleto(isabel);
+
+  isabel.conyuge =
+    nombreCompleto(pedroAyres);
+
+
+  pedroRomero.padre =
+    nombreCompleto(pedroAyres);
+
+  pedroRomero.madre =
+    nombreCompleto(isabel);
+
+
+  /* =====================================================
+     GENERACIÓN 5
+  ===================================================== */
+
+  const celestino =
+    persona(
+      "Celestino",
+      "Galache García",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  celestino.principal = true;
+
+
+  const teodora =
+    persona(
+      "Teodora",
+      "Ayres",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  teodora.principal = true;
+
+
+  celestino.conyuge =
+    nombreCompleto(teodora);
+
+  teodora.conyuge =
+    nombreCompleto(celestino);
+
+
+  pedroAyres.padre =
+    nombreCompleto(celestino);
+
+  pedroAyres.madre =
+    nombreCompleto(teodora);
+
+
+  /* =====================================================
+     GENERACIÓN 6
+  ===================================================== */
+
+  const santiago =
+    persona(
+      "Santiago",
+      "Galache García",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  santiago.principal = true;
+
+
+  const florentina =
+    persona(
+      "Florentina",
+      "García",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  florentina.principal = true;
+
+
+  santiago.conyuge =
+    nombreCompleto(florentina);
+
+  florentina.conyuge =
+    nombreCompleto(santiago);
+
+
+  celestino.padre =
+    nombreCompleto(santiago);
+
+  celestino.madre =
+    nombreCompleto(florentina);
+
+
+  /* =====================================================
+     GENERACIÓN 7
+  ===================================================== */
+
+  const joseph =
+    persona(
+      "Joseph",
+      "Galache Melgar",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  joseph.principal = true;
+
+
+  const josefa =
+    persona(
+      "Josefa",
+      "García Paradinas",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  josefa.principal = true;
+
+
+  joseph.conyuge =
+    nombreCompleto(josefa);
+
+  josefa.conyuge =
+    nombreCompleto(joseph);
+
+
+  santiago.padre =
+    nombreCompleto(joseph);
+
+  santiago.madre =
+    nombreCompleto(josefa);
+
+
+  /* =====================================================
+     GENERACIÓN 8
+  ===================================================== */
+
+  const francisco =
+    persona(
+      "Francisco",
+      "Galache Fraile",
+      "1705",
+      "Ituero de Huebra (Salamanca)",
+      "Documentado",
+      "Hijo legítimo de Francisco Galache y María Fraile."
+    );
+
+
+  francisco.principal = true;
+
+
+  const maria =
+    persona(
+      "María",
+      "Melgar",
+      "",
+      "",
+      "Documentado"
+    );
+
+
+  maria.principal = true;
+
+
+  francisco.conyuge =
+    nombreCompleto(maria);
+
+  maria.conyuge =
+    nombreCompleto(francisco);
+
+
+  joseph.padre =
+    nombreCompleto(francisco);
+
+  joseph.madre =
+    nombreCompleto(maria);
+
+
+  db.personas =
+    personas;
+
+
+  guardar();
+
+}
+
+
+/* =========================================================
+   NORMALIZACIÓN
+========================================================= */
+
+function normalizarPersonas(){
+
+  if(!Array.isArray(db.personas)){
+    db.personas = [];
+  }
+
+
+  db.personas.forEach(p => {
+
+    if(!p.id){
+      p.id = uid();
+    }
+
+    p.nombre =
+      p.nombre || "";
+
+    p.apellidos =
+      p.apellidos || "";
+
+    p.variantes =
+      p.variantes || "";
+
+    p.nacimiento =
+      p.nacimiento || "";
+
+    p.nacimientoLugar =
+      p.nacimientoLugar || "";
+
+    p.matrimonio =
+      p.matrimonio || "";
+
+    p.matrimonioLugar =
+      p.matrimonioLugar || "";
+
+    /*
+       Padre, madre y cónyuge son ahora
+       campos de texto libre.
+    */
+
+    p.padre =
+      p.padre || "";
+
+    p.madre =
+      p.madre || "";
+
+    p.conyuge =
+      p.conyuge || "";
+
+    p.certeza =
+      p.certeza || "Pendiente";
+
+    p.hijos =
+      p.hijos || "";
+
+    p.notas =
+      p.notas || "";
+
+    p.principal =
+      !!p.principal;
+
+  });
+
+}
+
+
+/* =========================================================
+   GUARDAR
+========================================================= */
 
 function guardar(){
 
@@ -915,736 +1635,74 @@ function guardar(){
 }
 
 
+/* =========================================================
+   CARGAR
+========================================================= */
+
 function cargar(){
 
-  try{
+  const raw =
+    localStorage.getItem(
+      STORAGE_KEY
+    );
 
-    const raw =
-      localStorage.getItem(STORAGE_KEY);
 
-    if(raw){
+  if(raw){
 
-      const data = JSON.parse(raw);
+    try{
 
-      if(
-        data &&
-        typeof data === "object" &&
-        Array.isArray(data.personas)
-      ){
+      db =
+        JSON.parse(raw);
 
-        return normalizarDB(data);
+      normalizarPersonas();
 
-      }
+    }catch(e){
+
+      console.error(e);
+
+      crearDatosIniciales();
 
     }
 
-  }catch(e){
+  }else{
 
-    console.error(
-      "Error cargando datos:",
-      e
-    );
+    crearDatosIniciales();
 
   }
 
-  return crearDBInicial();
-
 }
 
 
 /* =========================================================
-   PERSONA
+   ESCUDO
 ========================================================= */
 
-function persona(datos={}){
+function cargarEscudoGuardado(){
 
-  return {
-
-    id:
-      datos.id ||
-      uid(),
-
-    nombre:
-      datos.nombre ||
-      "",
-
-    apellidos:
-      datos.apellidos ||
-      "",
-
-    variantes:
-      datos.variantes ||
-      "",
-
-    estado:
-      datos.estado ||
-      "Confirmado",
-
-    nacimiento:
-      datos.nacimiento ||
-      "",
-
-    lugarNacimiento:
-      datos.lugarNacimiento ||
-      "",
-
-    matrimonio:
-      datos.matrimonio ||
-      "",
-
-    lugarMatrimonio:
-      datos.lugarMatrimonio ||
-      "",
-
-    padre:
-      datos.padre ||
-      "",
-
-    madre:
-      datos.madre ||
-      "",
-
-    conyuge:
-      datos.conyuge ||
-      "",
-
-    hijos:
-      datos.hijos ||
-      "",
-
-    notas:
-      datos.notas ||
-      "",
-
-    sexo:
-      datos.sexo ||
-      "",
-
-    galache:
-      !!datos.galache,
-
-    actual:
-      !!datos.actual
-
-  };
-
-}
-
-
-/* =========================================================
-   NORMALIZAR
-========================================================= */
-
-function normalizarPersonas(personas){
-
-  return personas.map(p => {
-
-    p.id =
-      p.id ||
-      uid();
-
-    p.nombre =
-      p.nombre || "";
-
-    p.apellidos =
-      p.apellidos || "";
-
-    p.variantes =
-      p.variantes || "";
-
-    p.estado =
-      p.estado ||
-      "Confirmado";
-
-    p.nacimiento =
-      p.nacimiento || "";
-
-    p.lugarNacimiento =
-      p.lugarNacimiento || "";
-
-    p.matrimonio =
-      p.matrimonio || "";
-
-    p.lugarMatrimonio =
-      p.lugarMatrimonio || "";
-
-    p.padre =
-      p.padre || "";
-
-    p.madre =
-      p.madre || "";
-
-    p.conyuge =
-      p.conyuge || "";
-
-    p.hijos =
-      p.hijos || "";
-
-    p.notas =
-      p.notas || "";
-
-    p.sexo =
-      p.sexo || "";
-
-    p.galache =
-      !!p.galache;
-
-    p.actual =
-      !!p.actual;
-
-    return p;
-
-  });
-
-}
-
-
-function normalizarDB(data){
-
-  data.personas =
-    normalizarPersonas(
-      Array.isArray(data.personas)
-        ? data.personas
-        : []
+  const img =
+    localStorage.getItem(
+      SHIELD_KEY
     );
 
-  return data;
+
+  if(img){
+
+    document.getElementById(
+      "escudo"
+    ).innerHTML =
+      `<img src="${img}" alt="Escudo GALACHE">`;
+
+  }
 
 }
-
-
-/* =========================================================
-   DATOS INICIALES
-========================================================= */
-
-function crearDBInicial(){
-
-  const personas = [];
-
-
-  personas.push(
-    persona({
-
-      id:"jose-antonio",
-
-      nombre:"José Antonio",
-
-      apellidos:"Vázquez Galache",
-
-      estado:"Confirmado",
-
-      nacimiento:"12/01/1959",
-
-      lugarNacimiento:"",
-
-      padre:"",
-
-      madre:"",
-
-      conyuge:"María Jesús Ruiz Montilla",
-
-      notas:
-        "Investigación genealógica familiar.",
-
-      sexo:"M",
-
-      galache:true,
-
-      actual:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"maria-jesus",
-
-      nombre:"María Jesús",
-
-      apellidos:"Ruiz Montilla",
-
-      estado:"Confirmado",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      padre:"",
-
-      madre:"",
-
-      conyuge:"José Antonio Vázquez Galache",
-
-      sexo:"F"
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"violeta",
-
-      nombre:"Violeta",
-
-      apellidos:"Galache Rubio",
-
-      estado:"Confirmado",
-
-      nacimiento:"28/08/1927",
-
-      lugarNacimiento:"Genalguacil (Málaga)",
-
-      padre:"Pedro Galache Romero",
-
-      madre:"Francisca Rubio Rubio",
-
-      conyuge:"Plácido Vázquez Martínez",
-
-      sexo:"F",
-
-      galache:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"placido",
-
-      nombre:"Plácido",
-
-      apellidos:"Vázquez Martínez",
-
-      estado:"Confirmado",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      conyuge:"Violeta Galache Rubio",
-
-      sexo:"M"
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"pedro-romero",
-
-      nombre:"Pedro",
-
-      apellidos:"Galache Romero",
-
-      estado:"Confirmado",
-
-      nacimiento:"29/06/1897",
-
-      lugarNacimiento:"Genalguacil (Málaga)",
-
-      padre:"Pedro Galache Ayres",
-
-      madre:"Isabel Romero Sánchez",
-
-      conyuge:"Francisca Rubio Rubio",
-
-      sexo:"M",
-
-      galache:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"francisca-rubio",
-
-      nombre:"Francisca",
-
-      apellidos:"Rubio Rubio",
-
-      estado:"Confirmado",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      conyuge:"Pedro Galache Romero",
-
-      sexo:"F"
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"pedro-ayres",
-
-      nombre:"Pedro",
-
-      apellidos:"Galache Ayres",
-
-      variantes:"Airez / Aire",
-
-      estado:"Confirmado",
-
-      nacimiento:"31/01/1856",
-
-      lugarNacimiento:"Villavieja de Yeltes (Salamanca)",
-
-      padre:"Celestino Galache García",
-
-      madre:"Teodora Ayres",
-
-      conyuge:"Isabel Romero Sánchez",
-
-      notas:
-        "Bautizado el 3 de febrero de 1856. Nació el 31 de enero a las 10 de la mañana.",
-
-      sexo:"M",
-
-      galache:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"isabel-romero",
-
-      nombre:"Isabel",
-
-      apellidos:"Romero Sánchez",
-
-      estado:"Confirmado",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      conyuge:"Pedro Galache Ayres",
-
-      sexo:"F"
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"celestino",
-
-      nombre:"Celestino",
-
-      apellidos:"Galache García",
-
-      estado:"Confirmado",
-
-      nacimiento:"1813",
-
-      lugarNacimiento:"Villavieja de Yeltes (Salamanca)",
-
-      padre:"Santiago Galache García",
-
-      madre:"Florentina García",
-
-      conyuge:"Teodora Ayres",
-
-      matrimonio:"08/05/1841",
-
-      lugarMatrimonio:"Villavieja de Yeltes (Salamanca)",
-
-      notas:
-        "En la partida matrimonial consta natural de Villavieja de Yeltes, de 28 años, hijo de Santiago Galache y Florentina García.",
-
-      sexo:"M",
-
-      galache:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"teodora-ayres",
-
-      nombre:"Teodora",
-
-      apellidos:"Ayres",
-
-      variantes:"Aires",
-
-      estado:"Confirmado",
-
-      nacimiento:"1817",
-
-      lugarNacimiento:"",
-
-      padre:"Juan José Ayres",
-
-      madre:"María López",
-
-      conyuge:"Celestino Galache García",
-
-      matrimonio:"08/05/1841",
-
-      lugarMatrimonio:"Villavieja de Yeltes (Salamanca)",
-
-      sexo:"F"
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"santiago",
-
-      nombre:"Santiago",
-
-      apellidos:"Galache García",
-
-      estado:"Confirmado",
-
-      nacimiento:"14/03/1775",
-
-      lugarNacimiento:"",
-
-      padre:"",
-
-      madre:"",
-
-      conyuge:"Florentina García",
-
-      sexo:"M",
-
-      galache:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"florentina",
-
-      nombre:"Florentina",
-
-      apellidos:"García",
-
-      estado:"Confirmado",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      conyuge:"Santiago Galache García",
-
-      notas:
-        "En algunas transcripciones antiguas aparece erróneamente como Lorentina.",
-
-      sexo:"F"
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"joseph",
-
-      nombre:"Joseph",
-
-      apellidos:"Galache Melgar",
-
-      estado:"Confirmado",
-
-      nacimiento:"14/03/1739",
-
-      lugarNacimiento:"",
-
-      padre:"Francisco Galache Fraile",
-
-      madre:"María Melgar",
-
-      conyuge:"Josefa García Paradinas",
-
-      sexo:"M",
-
-      galache:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"josefa",
-
-      nombre:"Josefa",
-
-      apellidos:"García Paradinas",
-
-      estado:"Confirmado",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      conyuge:"Joseph Galache Melgar",
-
-      sexo:"F"
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"francisco-fraile",
-
-      nombre:"Francisco",
-
-      apellidos:"Galache Fraile",
-
-      estado:"Confirmado",
-
-      nacimiento:"1705",
-
-      lugarNacimiento:"Ituero de Huebra (Salamanca)",
-
-      padre:"Francisco Galache",
-
-      madre:"María Fraile",
-
-      conyuge:"María Melgar",
-
-      notas:
-        "Hijo legítimo de Francisco Galache y María Fraile.",
-
-      sexo:"M",
-
-      galache:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"maria-melgar",
-
-      nombre:"María",
-
-      apellidos:"Melgar",
-
-      estado:"Confirmado",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      conyuge:"Francisco Galache Fraile",
-
-      sexo:"F"
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"francisco-padre",
-
-      nombre:"Francisco",
-
-      apellidos:"Galache",
-
-      estado:"Pendiente",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      conyuge:"María Fraile",
-
-      notas:
-        "Antepasado pendiente de documentar. Se investiga su relación con las ramas de Ituero, Villares de Yeltes y Salamanca.",
-
-      sexo:"M",
-
-      galache:true
-
-    })
-  );
-
-
-  personas.push(
-    persona({
-
-      id:"maria-fraile",
-
-      nombre:"María",
-
-      apellidos:"Fraile",
-
-      estado:"Pendiente",
-
-      nacimiento:"",
-
-      lugarNacimiento:"",
-
-      conyuge:"Francisco Galache",
-
-      sexo:"F"
-
-    })
-  );
-
-
-  return {
-
-    personas,
-
-    escudo:""
-
-  };
-
-}
-
-
-let db = cargar();
 
 
 /* =========================================================
    TABS
 ========================================================= */
 
-document.querySelectorAll(".tab")
+document
+  .querySelectorAll(".tab")
   .forEach(tab => {
 
     tab.addEventListener(
@@ -1657,26 +1715,22 @@ document.querySelectorAll(".tab")
             t.classList.remove("active")
           );
 
+
         document
           .querySelectorAll(".panel")
           .forEach(p =>
             p.classList.remove("active")
           );
 
+
         tab.classList.add("active");
 
-        const panel =
-          document.getElementById(
+
+        document
+          .getElementById(
             tab.dataset.tab
-          );
-
-        if(panel){
-
-          panel.classList.add("active");
-
-        }
-
-        render();
+          )
+          .classList.add("active");
 
       }
     );
@@ -1685,45 +1739,181 @@ document.querySelectorAll(".tab")
 
 
 /* =========================================================
-   NOMBRE COMPLETO
+   TARJETA PERSONA
 ========================================================= */
 
-function nombreCompleto(p){
+function tarjetaPersona(
+  p,
+  extraClass=""
+){
 
-  return [
-    p.nombre,
-    p.apellidos
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .trim();
+  if(!p){
+
+    return `
+      <div class="person-card">
+        <div class="person-name">
+          Sin datos
+        </div>
+      </div>
+    `;
+
+  }
+
+
+  let html = `
+
+    <div
+      class="person-card ${extraClass}"
+      onclick="mostrarDetalle('${p.id}')"
+    >
+
+      <div class="person-name">
+        ${esc(nombreCompleto(p))}
+      </div>
+
+      <div class="person-meta">
+  `;
+
+
+  if(p.nacimiento){
+
+    html += `
+      <div>
+        <strong>📅 Nacimiento:</strong>
+        ${esc(p.nacimiento)}
+      </div>
+    `;
+
+  }
+
+
+  if(p.nacimientoLugar){
+
+    html += `
+      <div>
+        <strong>📍 Lugar:</strong>
+        ${esc(p.nacimientoLugar)}
+      </div>
+    `;
+
+  }
+
+
+  if(p.padre){
+
+    html += `
+      <div>
+        <strong>👨 Padre:</strong>
+        ${esc(p.padre)}
+      </div>
+    `;
+
+  }
+
+
+  if(p.madre){
+
+    html += `
+      <div>
+        <strong>👩 Madre:</strong>
+        ${esc(p.madre)}
+      </div>
+    `;
+
+  }
+
+
+  if(p.conyuge){
+
+    html += `
+      <div>
+        <strong>💍 Cónyuge:</strong>
+        ${esc(p.conyuge)}
+      </div>
+    `;
+
+  }
+
+
+  html += `
+      </div>
+
+      <span class="badge ${
+        p.certeza === "Confirmado" ||
+        p.certeza === "Documentado"
+        ? "confirmado"
+        : "pendiente"
+      }">
+
+        ${esc(p.certeza)}
+
+      </span>
+
+    </div>
+  `;
+
+
+  return html;
 
 }
 
 
 /* =========================================================
-   BUSCAR PERSONA POR NOMBRE
+   GENERACIÓN
 ========================================================= */
 
-function buscarPersonaPorNombre(nombre){
+function dibujarGeneracion(
+  html,
+  titulo,
+  persona,
+  conyuge,
+  clasePersona=""
+){
 
-  const objetivo =
-    String(nombre || "")
-      .trim()
-      .toLowerCase();
+  html.push(`
 
-  if(!objetivo){
+    <div class="generation">
 
-    return null;
+      <div class="generation-title">
+        ${esc(titulo)}
+      </div>
+
+      <div class="tree-row">
+
+  `);
+
+
+  if(persona){
+
+    html.push(
+      tarjetaPersona(
+        persona,
+        `galache male ${clasePersona}`
+      )
+    );
 
   }
 
-  return db.personas.find(p => {
 
-    return nombreCompleto(p)
-      .toLowerCase() === objetivo;
+  if(conyuge){
 
-  }) || null;
+    html.push(
+      tarjetaPersona(
+        conyuge,
+        `female ${clasePersona}`
+      )
+    );
+
+  }
+
+
+  html.push(`
+
+      </div>
+
+    </div>
+
+  `);
 
 }
 
@@ -1732,230 +1922,243 @@ function buscarPersonaPorNombre(nombre){
    ÁRBOL PRINCIPAL
 ========================================================= */
 
-const generaciones = [
+function dibujarArbol(){
 
-  {
-    titulo:"Generación actual",
-    personas:[
-      "jose-antonio",
-      "maria-jesus"
-    ]
-  },
-
-  {
-    titulo:"Padres / abuelos",
-    personas:[
-      "violeta",
-      "placido"
-    ]
-  },
-
-  {
-    titulo:"Abuelos",
-    personas:[
-      "pedro-romero",
-      "francisca-rubio"
-    ]
-  },
-
-  {
-    titulo:"Bisabuelos",
-    personas:[
-      "pedro-ayres",
-      "isabel-romero"
-    ]
-  },
-
-  {
-    titulo:"3ª generación ascendente",
-    personas:[
-      "celestino",
-      "teodora-ayres"
-    ]
-  },
-
-  {
-    titulo:"4ª generación ascendente",
-    personas:[
-      "santiago",
-      "florentina"
-    ]
-  },
-
-  {
-    titulo:"5ª generación ascendente",
-    personas:[
-      "joseph",
-      "josefa"
-    ]
-  },
-
-  {
-    titulo:"6ª generación ascendente",
-    personas:[
-      "francisco-fraile",
-      "maria-melgar"
-    ]
-  }
-
-];
-
-
-/* =========================================================
-   OBTENER PERSONA
-========================================================= */
-
-function getPersona(id){
-
-  return db.personas.find(
-    p => p.id === id
-  );
-
-}
-
-
-/* =========================================================
-   RENDER ÁRBOL
-========================================================= */
-
-function renderArbol(){
-
-  const tree =
+  const cont =
     document.getElementById("tree");
 
-  if(!tree){
 
-    return;
-
-  }
-
-  let html = "";
+  if(!cont) return;
 
 
-  generaciones.forEach(
-    (gen,index) => {
+  const joseAntonio =
+    buscarPersonaNombre(
+      "José Antonio Vázquez Galache"
+    );
 
-      const validos =
-        gen.personas
-          .map(getPersona)
-          .filter(Boolean);
-
-
-      if(!validos.length){
-
-        return;
-
-      }
+  const mariaJesus =
+    buscarPersonaNombre(
+      "María Jesús Ruiz Montilla"
+    );
 
 
-      html += `
+  const violeta =
+    buscarPersonaNombre(
+      "Violeta Galache Rubio"
+    );
 
-        <div class="generation">
-
-          <div class="generation-title">
-            ${esc(gen.titulo)}
-          </div>
-
-          <div class="tree-row">
-
-      `;
+  const placido =
+    buscarPersonaNombre(
+      "Plácido Vázquez Martínez"
+    );
 
 
-      validos.forEach(p => {
+  const pedroRomero =
+    buscarPersonaNombre(
+      "Pedro Galache Romero"
+    );
 
-        const claseSexo =
-          p.sexo === "F"
-            ? "female"
-            : "male";
-
-        const galache =
-          p.galache
-            ? "galache"
-            : "";
-
-        const actual =
-          p.actual
-            ? "current"
-            : "";
+  const francisca =
+    buscarPersonaNombre(
+      "Francisca Rubio Rubio"
+    );
 
 
-        html += `
+  const pedroAyres =
+    buscarPersonaNombre(
+      "Pedro Galache Ayres"
+    );
 
-          <div
-            class="person-card ${claseSexo} ${galache} ${actual}"
-            onclick="mostrarDetalle('${p.id}')">
-
-            <div class="person-name">
-              ${esc(nombreCompleto(p))}
-            </div>
-
-            <div class="person-meta">
-
-              ${
-                p.nacimiento
-                  ? `<div><strong>Nacimiento:</strong> ${esc(p.nacimiento)}</div>`
-                  : ""
-              }
-
-              ${
-                p.lugarNacimiento
-                  ? `<div><strong>Lugar:</strong> ${esc(p.lugarNacimiento)}</div>`
-                  : ""
-              }
-
-              ${
-                p.conyuge
-                  ? `<div><strong>Cónyuge:</strong> ${esc(p.conyuge)}</div>`
-                  : ""
-              }
-
-            </div>
-
-            <span class="badge ${
-              p.estado === "Pendiente"
-                ? "pendiente"
-                : "confirmado"
-            }">
-              ${esc(p.estado)}
-            </span>
-
-          </div>
-
-        `;
-
-      });
+  const isabel =
+    buscarPersonaNombre(
+      "Isabel Romero Sánchez"
+    );
 
 
-      html += `
+  const celestino =
+    buscarPersonaNombre(
+      "Celestino Galache García"
+    );
 
-          </div>
+  const teodora =
+    buscarPersonaNombre(
+      "Teodora Ayres"
+    );
 
-        </div>
 
-      `;
+  const santiago =
+    buscarPersonaNombre(
+      "Santiago Galache García"
+    );
+
+  const florentina =
+    buscarPersonaNombre(
+      "Florentina García"
+    );
 
 
-      if(index < generaciones.length - 1){
+  const joseph =
+    buscarPersonaNombre(
+      "Joseph Galache Melgar"
+    );
 
-        html += `
-          <div class="connector"></div>
-        `;
+  const josefa =
+    buscarPersonaNombre(
+      "Josefa García Paradinas"
+    );
 
-      }
 
-    }
+  const francisco =
+    buscarPersonaNombre(
+      "Francisco Galache Fraile"
+    );
+
+  const maria =
+    buscarPersonaNombre(
+      "María Melgar"
+    );
+
+
+  let html = [];
+
+
+  /* =====================================================
+     GENERACIÓN 1 — ACTUAL
+  ===================================================== */
+
+  dibujarGeneracion(
+    html,
+    "Generación 1 · José Antonio",
+    joseAntonio,
+    mariaJesus,
+    "current"
   );
 
 
-  html += `
+  html.push(
+    `<div class="connector"></div>`
+  );
 
-    <div class="tree-note">
 
-      Árbol principal de la investigación familiar GALACHE.
-      Las generaciones pendientes se irán incorporando
-      a medida que aparezcan nuevas fuentes documentales.
+  /* =====================================================
+     GENERACIÓN 2
+  ===================================================== */
 
-    </div>
+  dibujarGeneracion(
+    html,
+    "Generación 2 · Padres",
+    violeta,
+    placido
+  );
+
+
+  html.push(
+    `<div class="connector"></div>`
+  );
+
+
+  /* =====================================================
+     GENERACIÓN 3
+  ===================================================== */
+
+  dibujarGeneracion(
+    html,
+    "Generación 3",
+    pedroRomero,
+    francisca
+  );
+
+
+  html.push(
+    `<div class="connector"></div>`
+  );
+
+
+  /* =====================================================
+     GENERACIÓN 4
+  ===================================================== */
+
+  dibujarGeneracion(
+    html,
+    "Generación 4",
+    pedroAyres,
+    isabel
+  );
+
+
+  html.push(
+    `<div class="connector"></div>`
+  );
+
+
+  /* =====================================================
+     GENERACIÓN 5
+  ===================================================== */
+
+  dibujarGeneracion(
+    html,
+    "Generación 5",
+    celestino,
+    teodora
+  );
+
+
+  html.push(
+    `<div class="connector"></div>`
+  );
+
+
+  /* =====================================================
+     GENERACIÓN 6
+  ===================================================== */
+
+  dibujarGeneracion(
+    html,
+    "Generación 6",
+    santiago,
+    florentina
+  );
+
+
+  html.push(
+    `<div class="connector"></div>`
+  );
+
+
+  /* =====================================================
+     GENERACIÓN 7
+  ===================================================== */
+
+  dibujarGeneracion(
+    html,
+    "Generación 7",
+    joseph,
+    josefa
+  );
+
+
+  html.push(
+    `<div class="connector"></div>`
+  );
+
+
+  /* =====================================================
+     GENERACIÓN 8
+  ===================================================== */
+
+  dibujarGeneracion(
+    html,
+    "Generación 8 · Inicio documentado actual",
+    francisco,
+    maria
+  );
+
+
+  /* =====================================================
+     AÑADIR ANTEPASADOS
+  ===================================================== */
+
+  html.push(`
 
     <div class="add-ancestor">
 
@@ -1964,13 +2167,13 @@ function renderArbol(){
       </div>
 
       <div class="add-ancestor-text">
-        Puedes añadir aquí nuevos antepasados
-        de Francisco Galache Fraile.
+        Añade aquí los padres de Francisco Galache
+        Fraile cuando los documentemos.
       </div>
 
       <button
         class="btn gold"
-        onclick="nuevaPersona(true)">
+        onclick="nuevaPersona(true,'${francisco ? francisco.id : ""}')">
 
         + Añadir antepasado
 
@@ -1978,192 +2181,171 @@ function renderArbol(){
 
     </div>
 
-  `;
+  `);
 
 
-  tree.innerHTML = html;
+  cont.innerHTML =
+    html.join("");
 
 }
 
 
 /* =========================================================
-   RENDER PERSONAS
+   PERSONAS
 ========================================================= */
 
-function renderPersonas(){
+function dibujarPersonas(){
 
-  const grid =
+  const cont =
     document.getElementById(
       "personasGrid"
     );
 
-  if(!grid){
 
-    return;
-
-  }
+  if(!cont) return;
 
 
   if(!db.personas.length){
 
-    grid.innerHTML =
-      `<div class="empty">
+    cont.innerHTML = `
+      <div class="empty">
         No hay personas registradas.
-      </div>`;
+      </div>
+    `;
 
     return;
 
   }
 
 
-  const ordenadas =
+  const personas =
     [...db.personas]
-      .sort((a,b) =>
-        nombreCompleto(a)
+      .sort((a,b) => {
+
+        return nombreCompleto(a)
           .localeCompare(
             nombreCompleto(b),
             "es"
-          )
-      );
+          );
+
+      });
 
 
-  grid.innerHTML =
-    ordenadas.map(p => {
+  cont.innerHTML =
+    personas.map(p => `
 
-      const clase =
-        p.actual
+      <div class="
+        persona-item
+        ${p.apellidos.includes("Galache")
+          ? "galache-item"
+          : ""}
+        ${nombreCompleto(p) ===
+          "José Antonio Vázquez Galache"
           ? "current-item"
-          : (
-              p.galache
-                ? "galache-item"
-                : ""
-            );
+          : ""}
+      ">
 
+        <div class="person-name">
 
-      return `
-
-        <div
-          class="persona-item ${clase}">
-
-          <div class="person-name">
-            ${esc(nombreCompleto(p))}
-          </div>
-
-          <div class="person-meta">
-
-            ${
-              p.nacimiento
-                ? `<div><strong>Nacimiento:</strong> ${esc(p.nacimiento)}</div>`
-                : ""
-            }
-
-            ${
-              p.lugarNacimiento
-                ? `<div><strong>Lugar:</strong> ${esc(p.lugarNacimiento)}</div>`
-                : ""
-            }
-
-            ${
-              p.conyuge
-                ? `<div><strong>Cónyuge:</strong> ${esc(p.conyuge)}</div>`
-                : ""
-            }
-
-            ${
-              p.estado
-                ? `<div><strong>Estado:</strong> ${esc(p.estado)}</div>`
-                : ""
-            }
-
-          </div>
-
-
-          <div class="actions">
-
-            <button
-              class="btn"
-              onclick="mostrarDetalle('${p.id}')">
-
-              Ver ficha
-
-            </button>
-
-            <button
-              class="btn"
-              onclick="editarPersona('${p.id}')">
-
-              Editar
-
-            </button>
-
-            <button
-              class="btn red"
-              onclick="eliminarPersona('${p.id}')">
-
-              Eliminar
-
-            </button>
-
-          </div>
+          ${esc(
+            nombreCompleto(p)
+          )}
 
         </div>
 
-      `;
 
-    }).join("");
+        <div class="person-meta">
+
+          ${
+            p.nacimiento
+            ? `
+              <div>
+                <strong>📅 Nacimiento:</strong>
+                ${esc(p.nacimiento)}
+              </div>
+            `
+            : ""
+          }
+
+          ${
+            p.nacimientoLugar
+            ? `
+              <div>
+                <strong>📍 Lugar:</strong>
+                ${esc(p.nacimientoLugar)}
+              </div>
+            `
+            : ""
+          }
+
+          ${
+            p.certeza
+            ? `
+              <div style="margin-top:5px">
+                <strong>Estado:</strong>
+                ${esc(p.certeza)}
+              </div>
+            `
+            : ""
+          }
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            class="btn"
+            onclick="mostrarDetalle('${p.id}')">
+
+            Ver ficha
+
+          </button>
+
+
+          <button
+            class="btn"
+            onclick="editarPersona('${p.id}')">
+
+            Editar
+
+          </button>
+
+
+          ${
+            !esPersonaPrincipal(p)
+            ? `
+              <button
+                class="btn red"
+                onclick="eliminarPersona('${p.id}')">
+
+                Eliminar
+
+              </button>
+            `
+            : ""
+          }
+
+        </div>
+
+      </div>
+
+    `).join("");
 
 }
 
 
 /* =========================================================
-   RENDER GENERAL
+   PERSONAS PRINCIPALES
 ========================================================= */
 
-function render(){
+function esPersonaPrincipal(p){
 
-  renderArbol();
+  if(!p) return false;
 
-  renderPersonas();
-
-}
-
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-function abrirModal(){
-
-  document
-    .getElementById("modal")
-    .classList.add("show");
+  return !!p.principal;
 
 }
-
-
-function cerrarModal(){
-
-  document
-    .getElementById("modal")
-    .classList.remove("show");
-
-}
-
-
-document
-  .getElementById("modal")
-  .addEventListener(
-    "click",
-    e => {
-
-      if(e.target.id === "modal"){
-
-        cerrarModal();
-
-      }
-
-    }
-  );
 
 
 /* =========================================================
@@ -2175,212 +2357,190 @@ function mostrarDetalle(id){
   const p =
     getPersona(id);
 
-  if(!p){
 
-    return;
+  if(!p) return;
+
+
+  document.getElementById(
+    "modalTitulo"
+  ).textContent =
+    nombreCompleto(p);
+
+
+  const form =
+    document.getElementById(
+      "personaForm"
+    );
+
+
+  form.style.display =
+    "none";
+
+
+  let detalle =
+    document.getElementById(
+      "detallePersona"
+    );
+
+
+  if(!detalle){
+
+    detalle =
+      document.createElement("div");
+
+    detalle.id =
+      "detallePersona";
+
+    form.parentNode.insertBefore(
+      detalle,
+      form
+    );
 
   }
 
 
-  document
-    .getElementById("modalTitle")
-    .textContent =
-      nombreCompleto(p);
+  detalle.innerHTML = `
 
+    <div class="detail-box">
 
-  document
-    .getElementById("modalContent")
-    .innerHTML = `
-
-      <div class="detail-box">
-
-
-        ${
-          p.nacimiento
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Nacimiento:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.nacimiento)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.lugarNacimiento
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Lugar de nacimiento:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.lugarNacimiento)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.padre
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Padre:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.padre)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.madre
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Madre:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.madre)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.conyuge
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Cónyuge:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.conyuge)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.matrimonio
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Matrimonio:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.matrimonio)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.lugarMatrimonio
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Lugar de matrimonio:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.lugarMatrimonio)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.estado
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Estado:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.estado)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.variantes
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Variantes:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.variantes)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        ${
-          p.notas
-            ? `
-              <div class="detail-row">
-                <span class="detail-label">
-                  Notas:
-                </span>
-                <span class="detail-value">
-                  ${esc(p.notas)}
-                </span>
-              </div>
-            `
-            : ""
-        }
-
-
-        <div class="form-actions">
-
-          <button
-            class="btn"
-            onclick="editarPersona('${p.id}')">
-
-            Editar ficha
-
-          </button>
-
-          <button
-            class="btn"
-            onclick="cerrarModal()">
-
-            Cerrar
-
-          </button>
-
-        </div>
-
+      <div class="detail-row">
+        <span class="detail-label">
+          📅 Nacimiento
+        </span><br>
+        <span class="detail-value">
+          ${esc(p.nacimiento || "—")}
+        </span>
       </div>
+
+
+      <div class="detail-row">
+        <span class="detail-label">
+          📍 Lugar
+        </span><br>
+        <span class="detail-value">
+          ${esc(p.nacimientoLugar || "—")}
+        </span>
+      </div>
+
+
+      <div class="detail-row">
+        <span class="detail-label">
+          👨 Padre
+        </span><br>
+        <span class="detail-value">
+          ${esc(
+            p.padre || "—"
+          )}
+        </span>
+      </div>
+
+
+      <div class="detail-row">
+        <span class="detail-label">
+          👩 Madre
+        </span><br>
+        <span class="detail-value">
+          ${esc(
+            p.madre || "—"
+          )}
+        </span>
+      </div>
+
+
+      <div class="detail-row">
+        <span class="detail-label">
+          💍 Cónyuge
+        </span><br>
+        <span class="detail-value">
+          ${esc(
+            p.conyuge || "—"
+          )}
+        </span>
+      </div>
+
+
+      <div class="detail-row">
+        <span class="detail-label">
+          💒 Matrimonio
+        </span><br>
+        <span class="detail-value">
+          ${esc(p.matrimonio || "—")}
+        </span>
+      </div>
+
+
+      <div class="detail-row">
+        <span class="detail-label">
+          📍 Lugar matrimonio
+        </span><br>
+        <span class="detail-value">
+          ${esc(p.matrimonioLugar || "—")}
+        </span>
+      </div>
+
+
+      <div class="detail-row">
+        <span class="detail-label">
+          📜 Estado
+        </span><br>
+        <span class="detail-value">
+          ${esc(p.certeza || "—")}
+        </span>
+      </div>
+
+
+      ${
+        p.variantes
+        ? `
+          <div class="detail-row">
+            <span class="detail-label">
+              Variantes
+            </span><br>
+            <span class="detail-value">
+              ${esc(p.variantes)}
+            </span>
+          </div>
+        `
+        : ""
+      }
+
+
+      ${
+        p.notas
+        ? `
+          <div class="detail-row">
+            <span class="detail-label">
+              Notas
+            </span><br>
+            <span class="detail-value">
+              ${esc(p.notas)}
+            </span>
+          </div>
+        `
+        : ""
+      }
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        class="btn gold"
+        onclick="editarPersona('${p.id}')">
+
+        Editar ficha
+
+      </button>
+
+    </div>
 
   `;
 
 
-  abrirModal();
+  document.getElementById(
+    "modal"
+  ).classList.add("show");
 
 }
 
@@ -2389,320 +2549,64 @@ function mostrarDetalle(id){
    NUEVA PERSONA
 ========================================================= */
 
-function nuevaPersona(antepasado=false){
+let padrePreseleccionado = "";
 
-  document
-    .getElementById("modalTitle")
-    .textContent =
-      antepasado
-        ? "Añadir antepasado"
-        : "Nueva persona";
 
+function nuevaPersona(
+  antepasado=false,
+  hijoId=""
+){
 
-  document
-    .getElementById("modalContent")
-    .innerHTML = `
+  padrePreseleccionado =
+    hijoId || "";
 
-      <form
-        id="personaForm">
 
-        <div class="form-grid">
+  document.getElementById(
+    "modalTitulo"
+  ).textContent =
+    antepasado
+    ? "Añadir antepasado"
+    : "Nueva persona";
 
 
-          <div class="field">
+  document.getElementById(
+    "personaForm"
+  ).reset();
 
-            <label>Nombre</label>
 
-            <input
-              id="fNombre"
-              autocomplete="off"
-              required>
+  document.getElementById(
+    "personaForm"
+  ).style.display =
+    "block";
 
-          </div>
 
-
-          <div class="field">
-
-            <label>Apellidos</label>
-
-            <input
-              id="fApellidos"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Variantes del apellido</label>
-
-            <input
-              id="fVariantes"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Estado</label>
-
-            <select id="fEstado">
-
-              <option value="Confirmado">
-                Confirmado
-              </option>
-
-              <option value="Pendiente">
-                Pendiente
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Nacimiento</label>
-
-            <input
-              id="fNacimiento"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Lugar de nacimiento</label>
-
-            <input
-              id="fLugarNacimiento"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Matrimonio</label>
-
-            <input
-              id="fMatrimonio"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Lugar de matrimonio</label>
-
-            <input
-              id="fLugarMatrimonio"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Padre</label>
-
-            <input
-              id="fPadre"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Madre</label>
-
-            <input
-              id="fMadre"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field full">
-
-            <label>Cónyuge</label>
-
-            <input
-              id="fConyuge"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field full">
-
-            <label>Hijos</label>
-
-            <textarea
-              id="fHijos"
-              placeholder="Un hijo por línea: Nombre | Fecha de nacimiento"></textarea>
-
-          </div>
-
-
-          <div class="field full">
-
-            <label>Notas</label>
-
-            <textarea
-              id="fNotas"></textarea>
-
-          </div>
-
-
-        </div>
-
-
-        <div class="form-actions">
-
-          <button
-            type="submit"
-            class="btn gold">
-
-            Guardar
-
-          </button>
-
-          <button
-            type="button"
-            class="btn"
-            onclick="cerrarModal()">
-
-            Cancelar
-
-          </button>
-
-        </div>
-
-      </form>
-
-  `;
-
-
-  document
-    .getElementById("personaForm")
-    .addEventListener(
-      "submit",
-      function(e){
-
-        e.preventDefault();
-
-
-        const p =
-          persona({
-
-            nombre:
-              document
-                .getElementById("fNombre")
-                .value
-                .trim(),
-
-            apellidos:
-              document
-                .getElementById("fApellidos")
-                .value
-                .trim(),
-
-            variantes:
-              document
-                .getElementById("fVariantes")
-                .value
-                .trim(),
-
-            estado:
-              document
-                .getElementById("fEstado")
-                .value,
-
-            nacimiento:
-              document
-                .getElementById("fNacimiento")
-                .value
-                .trim(),
-
-            lugarNacimiento:
-              document
-                .getElementById("fLugarNacimiento")
-                .value
-                .trim(),
-
-            matrimonio:
-              document
-                .getElementById("fMatrimonio")
-                .value
-                .trim(),
-
-            lugarMatrimonio:
-              document
-                .getElementById("fLugarMatrimonio")
-                .value
-                .trim(),
-
-            padre:
-              document
-                .getElementById("fPadre")
-                .value
-                .trim(),
-
-            madre:
-              document
-                .getElementById("fMadre")
-                .value
-                .trim(),
-
-            conyuge:
-              document
-                .getElementById("fConyuge")
-                .value
-                .trim(),
-
-            hijos:
-              document
-                .getElementById("fHijos")
-                .value
-                .trim(),
-
-            notas:
-              document
-                .getElementById("fNotas")
-                .value
-                .trim(),
-
-            galache:
-              (
-                document
-                  .getElementById("fApellidos")
-                  .value
-                  .toLowerCase()
-                  .includes("galache")
-              )
-
-          });
-
-
-        db.personas.push(p);
-
-        guardar();
-
-        cerrarModal();
-
-        render();
-
-      }
+  const detalle =
+    document.getElementById(
+      "detallePersona"
     );
 
 
-  abrirModal();
+  if(detalle){
+
+    detalle.remove();
+
+  }
+
+
+  document.getElementById(
+    "personaId"
+  ).value = "";
+
+
+  /*
+     Ya no se cargan listas de personas.
+     Padre, Madre y Cónyuge son campos libres.
+  */
+
+
+  document.getElementById(
+    "modal"
+  ).classList.add("show");
 
 }
 
@@ -2716,346 +2620,273 @@ function editarPersona(id){
   const p =
     getPersona(id);
 
-  if(!p){
 
-    return;
+  if(!p) return;
+
+
+  document.getElementById(
+    "modalTitulo"
+  ).textContent =
+    "Editar persona";
+
+
+  document.getElementById(
+    "personaForm"
+  ).style.display =
+    "block";
+
+
+  const detalle =
+    document.getElementById(
+      "detallePersona"
+    );
+
+
+  if(detalle){
+
+    detalle.remove();
 
   }
 
 
-  document
-    .getElementById("modalTitle")
-    .textContent =
-      "Editar persona";
+  document.getElementById(
+    "personaId"
+  ).value =
+    p.id;
 
 
-  document
-    .getElementById("modalContent")
-    .innerHTML = `
+  document.getElementById(
+    "fNombre"
+  ).value =
+    p.nombre || "";
 
-      <form
-        id="personaForm">
 
-        <div class="form-grid">
+  document.getElementById(
+    "fApellidos"
+  ).value =
+    p.apellidos || "";
 
 
-          <div class="field">
+  document.getElementById(
+    "fVariantes"
+  ).value =
+    p.variantes || "";
 
-            <label>Nombre</label>
 
-            <input
-              id="fNombre"
-              value="${esc(p.nombre)}"
-              autocomplete="off"
-              required>
+  document.getElementById(
+    "fNacimiento"
+  ).value =
+    p.nacimiento || "";
 
-          </div>
 
+  document.getElementById(
+    "fNacimientoLugar"
+  ).value =
+    p.nacimientoLugar || "";
 
-          <div class="field">
 
-            <label>Apellidos</label>
+  document.getElementById(
+    "fMatrimonio"
+  ).value =
+    p.matrimonio || "";
 
-            <input
-              id="fApellidos"
-              value="${esc(p.apellidos)}"
-              autocomplete="off">
 
-          </div>
+  document.getElementById(
+    "fMatrimonioLugar"
+  ).value =
+    p.matrimonioLugar || "";
 
 
-          <div class="field">
+  document.getElementById(
+    "fHijos"
+  ).value =
+    p.hijos || "";
 
-            <label>Variantes del apellido</label>
 
-            <input
-              id="fVariantes"
-              value="${esc(p.variantes)}"
-              autocomplete="off">
+  document.getElementById(
+    "fNotas"
+  ).value =
+    p.notas || "";
 
-          </div>
 
+  document.getElementById(
+    "fCerteza"
+  ).value =
+    p.certeza || "Pendiente";
 
-          <div class="field">
 
-            <label>Estado</label>
+  /*
+     Padre, Madre y Cónyuge:
+     ahora se recuperan directamente
+     como texto libre.
+  */
 
-            <select id="fEstado">
+  document.getElementById(
+    "fPadre"
+  ).value =
+    p.padre || "";
 
-              <option
-                value="Confirmado"
-                ${p.estado === "Confirmado" ? "selected" : ""}>
 
-                Confirmado
+  document.getElementById(
+    "fMadre"
+  ).value =
+    p.madre || "";
 
-              </option>
 
-              <option
-                value="Pendiente"
-                ${p.estado === "Pendiente" ? "selected" : ""}>
+  document.getElementById(
+    "fConyuge"
+  ).value =
+    p.conyuge || "";
 
-                Pendiente
 
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Nacimiento</label>
-
-            <input
-              id="fNacimiento"
-              value="${esc(p.nacimiento)}"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Lugar de nacimiento</label>
-
-            <input
-              id="fLugarNacimiento"
-              value="${esc(p.lugarNacimiento)}"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Matrimonio</label>
-
-            <input
-              id="fMatrimonio"
-              value="${esc(p.matrimonio)}"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Lugar de matrimonio</label>
-
-            <input
-              id="fLugarMatrimonio"
-              value="${esc(p.lugarMatrimonio)}"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Padre</label>
-
-            <input
-              id="fPadre"
-              value="${esc(p.padre)}"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field">
-
-            <label>Madre</label>
-
-            <input
-              id="fMadre"
-              value="${esc(p.madre)}"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field full">
-
-            <label>Cónyuge</label>
-
-            <input
-              id="fConyuge"
-              value="${esc(p.conyuge)}"
-              autocomplete="off">
-
-          </div>
-
-
-          <div class="field full">
-
-            <label>Hijos</label>
-
-            <textarea
-              id="fHijos"
-              placeholder="Un hijo por línea: Nombre | Fecha de nacimiento">${esc(p.hijos || "")}</textarea>
-
-          </div>
-
-
-          <div class="field full">
-
-            <label>Notas</label>
-
-            <textarea
-              id="fNotas">${esc(p.notas)}</textarea>
-
-          </div>
-
-
-        </div>
-
-
-        <div class="form-actions">
-
-          <button
-            type="submit"
-            class="btn gold">
-
-            Guardar cambios
-
-          </button>
-
-          <button
-            type="button"
-            class="btn"
-            onclick="cerrarModal()">
-
-            Cancelar
-
-          </button>
-
-        </div>
-
-      </form>
-
-  `;
-
-
-  document
-    .getElementById("personaForm")
-    .addEventListener(
-      "submit",
-      function(e){
-
-        e.preventDefault();
-
-
-        p.nombre =
-          document
-            .getElementById("fNombre")
-            .value
-            .trim();
-
-
-        p.apellidos =
-          document
-            .getElementById("fApellidos")
-            .value
-            .trim();
-
-
-        p.variantes =
-          document
-            .getElementById("fVariantes")
-            .value
-            .trim();
-
-
-        p.estado =
-          document
-            .getElementById("fEstado")
-            .value;
-
-
-        p.nacimiento =
-          document
-            .getElementById("fNacimiento")
-            .value
-            .trim();
-
-
-        p.lugarNacimiento =
-          document
-            .getElementById("fLugarNacimiento")
-            .value
-            .trim();
-
-
-        p.matrimonio =
-          document
-            .getElementById("fMatrimonio")
-            .value
-            .trim();
-
-
-        p.lugarMatrimonio =
-          document
-            .getElementById("fLugarMatrimonio")
-            .value
-            .trim();
-
-
-        p.padre =
-          document
-            .getElementById("fPadre")
-            .value
-            .trim();
-
-
-        p.madre =
-          document
-            .getElementById("fMadre")
-            .value
-            .trim();
-
-
-        p.conyuge =
-          document
-            .getElementById("fConyuge")
-            .value
-            .trim();
-
-
-        p.hijos =
-          document
-            .getElementById("fHijos")
-            .value
-            .trim();
-
-
-        p.notas =
-          document
-            .getElementById("fNotas")
-            .value
-            .trim();
-
-
-        p.galache =
-          p.galache ||
-          p.apellidos
-            .toLowerCase()
-            .includes("galache");
-
-
-        guardar();
-
-        cerrarModal();
-
-        render();
-
-      }
-    );
-
-
-  abrirModal();
+  document.getElementById(
+    "modal"
+  ).classList.add("show");
 
 }
+
+
+/* =========================================================
+   GUARDAR PERSONA
+========================================================= */
+
+document
+  .getElementById("personaForm")
+  .addEventListener(
+    "submit",
+    function(e){
+
+      e.preventDefault();
+
+
+      const id =
+        document.getElementById(
+          "personaId"
+        ).value;
+
+
+      let p;
+
+
+      if(id){
+
+        p =
+          getPersona(id);
+
+      }else{
+
+        p = {
+          id:uid(),
+          principal:false
+        };
+
+        db.personas.push(p);
+
+      }
+
+
+      p.nombre =
+        document.getElementById(
+          "fNombre"
+        ).value.trim();
+
+
+      p.apellidos =
+        document.getElementById(
+          "fApellidos"
+        ).value.trim();
+
+
+      p.variantes =
+        document.getElementById(
+          "fVariantes"
+        ).value.trim();
+
+
+      p.nacimiento =
+        document.getElementById(
+          "fNacimiento"
+        ).value.trim();
+
+
+      p.nacimientoLugar =
+        document.getElementById(
+          "fNacimientoLugar"
+        ).value.trim();
+
+
+      p.matrimonio =
+        document.getElementById(
+          "fMatrimonio"
+        ).value.trim();
+
+
+      p.matrimonioLugar =
+        document.getElementById(
+          "fMatrimonioLugar"
+        ).value.trim();
+
+
+      /*
+         Padre = texto libre
+      */
+
+      p.padre =
+        document.getElementById(
+          "fPadre"
+        ).value.trim();
+
+
+      /*
+         Madre = texto libre
+      */
+
+      p.madre =
+        document.getElementById(
+          "fMadre"
+        ).value.trim();
+
+
+      /*
+         Cónyuge = texto libre
+      */
+
+      p.conyuge =
+        document.getElementById(
+          "fConyuge"
+        ).value.trim();
+
+
+      p.hijos =
+        document.getElementById(
+          "fHijos"
+        ).value.trim();
+
+
+      p.notas =
+        document.getElementById(
+          "fNotas"
+        ).value.trim();
+
+
+      p.certeza =
+        document.getElementById(
+          "fCerteza"
+        ).value;
+
+
+      guardar();
+
+
+      cerrarModal();
+
+
+      dibujarArbol();
+
+      dibujarPersonas();
+
+    }
+  );
 
 
 /* =========================================================
@@ -3067,7 +2898,15 @@ function eliminarPersona(id){
   const p =
     getPersona(id);
 
-  if(!p){
+
+  if(!p) return;
+
+
+  if(esPersonaPrincipal(p)){
+
+    alert(
+      "Las personas del árbol principal no se pueden eliminar desde aquí."
+    );
 
     return;
 
@@ -3076,9 +2915,7 @@ function eliminarPersona(id){
 
   if(
     !confirm(
-      "¿Eliminar a " +
-      nombreCompleto(p) +
-      "?"
+      `¿Eliminar a ${nombreCompleto(p)}?`
     )
   ){
 
@@ -3093,20 +2930,60 @@ function eliminarPersona(id){
     );
 
 
+  /*
+     Al ser relaciones de texto,
+     no es necesario borrar referencias.
+  */
+
+
   guardar();
 
-  render();
+  dibujarArbol();
+
+  dibujarPersonas();
 
 }
 
 
 /* =========================================================
-   EXPORTAR JSON
+   MODAL
+========================================================= */
+
+function cerrarModal(){
+
+  document
+    .getElementById("modal")
+    .classList.remove("show");
+
+}
+
+
+document
+  .getElementById("modal")
+  .addEventListener(
+    "click",
+    function(e){
+
+      if(e.target === this){
+
+        cerrarModal();
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   EXPORTAR
 ========================================================= */
 
 function exportarJSON(){
 
-  const contenido =
+  guardar();
+
+
+  const data =
     JSON.stringify(
       db,
       null,
@@ -3116,7 +2993,7 @@ function exportarJSON(){
 
   const blob =
     new Blob(
-      [contenido],
+      [data],
       {
         type:"application/json"
       }
@@ -3124,7 +3001,9 @@ function exportarJSON(){
 
 
   const url =
-    URL.createObjectURL(blob);
+    URL.createObjectURL(
+      blob
+    );
 
 
   const a =
@@ -3137,22 +3016,19 @@ function exportarJSON(){
       .slice(0,10);
 
 
-  a.href = url;
+  a.href =
+    url;
+
 
   a.download =
-    "antepasados_galache_" +
-    fecha +
-    ".json";
+    `Antepasados_GALACHE_${fecha}.json`;
 
 
-  document
-    .body
-    .appendChild(a);
+  document.body.appendChild(a);
 
   a.click();
 
   a.remove();
-
 
   URL.revokeObjectURL(url);
 
@@ -3160,23 +3036,22 @@ function exportarJSON(){
 
 
 /* =========================================================
-   IMPORTAR JSON
+   IMPORTAR
 ========================================================= */
 
 function importarJSON(){
 
   const input =
-    document
-      .getElementById(
-        "archivoImportar"
-      );
+    document.getElementById(
+      "archivoImportar"
+    );
 
 
-  if(
-    !input ||
-    !input.files ||
-    !input.files[0]
-  ){
+  const file =
+    input.files[0];
+
+
+  if(!file){
 
     alert(
       "Selecciona primero un archivo JSON."
@@ -3187,29 +3062,25 @@ function importarJSON(){
   }
 
 
-  const file =
-    input.files[0];
-
-
   const reader =
     new FileReader();
 
 
   reader.onload =
-    function(e){
+    function(){
 
       try{
 
-        const data =
+        const datos =
           JSON.parse(
-            e.target.result
+            reader.result
           );
 
 
         if(
-          !data ||
+          !datos ||
           !Array.isArray(
-            data.personas
+            datos.personas
           )
         ){
 
@@ -3221,28 +3092,30 @@ function importarJSON(){
 
 
         db =
-          normalizarDB(data);
+          datos;
 
+
+        normalizarPersonas();
 
         guardar();
 
-        render();
+
+        dibujarArbol();
+
+        dibujarPersonas();
 
 
         alert(
-          "Datos importados correctamente."
+          "Copia importada correctamente."
         );
 
 
-        input.value = "";
+      }catch(e){
 
-
-      }catch(error){
-
-        console.error(error);
+        console.error(e);
 
         alert(
-          "No se ha podido importar el archivo JSON."
+          "No se ha podido importar la copia."
         );
 
       }
@@ -3250,23 +3123,20 @@ function importarJSON(){
     };
 
 
-  reader.readAsText(
-    file,
-    "utf-8"
-  );
+  reader.readAsText(file);
 
 }
 
 
 /* =========================================================
-   RESTAURAR INICIAL
+   RESTAURAR
 ========================================================= */
 
 function restaurarInicial(){
 
   if(
     !confirm(
-      "¿Quieres restaurar los datos iniciales? Se perderán los cambios actuales que no estén en una copia JSON."
+      "Esto sustituirá los datos actuales por el árbol GALACHE inicial. ¿Continuar?"
     )
   ){
 
@@ -3275,69 +3145,33 @@ function restaurarInicial(){
   }
 
 
-  db =
-    crearDBInicial();
-
+  crearDatosIniciales();
 
   guardar();
 
-  render();
+  dibujarArbol();
+
+  dibujarPersonas();
 
 
   alert(
-    "Datos iniciales restaurados."
+    "Árbol inicial restaurado."
   );
 
 }
 
 
 /* =========================================================
-   ESCUDO
+   INICIO
 ========================================================= */
 
-function cargarEscudo(){
+cargar();
 
-  const escudo =
-    document.getElementById(
-      "escudo"
-    );
+cargarEscudoGuardado();
 
+dibujarArbol();
 
-  if(!escudo){
-
-    return;
-
-  }
-
-
-  if(db.escudo){
-
-    escudo.innerHTML = `
-
-      <img
-        src="${esc(db.escudo)}"
-        alt="Escudo GALACHE">
-
-    `;
-
-  }else{
-
-    escudo.innerHTML =
-      `<div class="escudo-default">G</div>`;
-
-  }
-
-}
-
-
-/* =========================================================
-   INICIALIZACIÓN
-========================================================= */
-
-render();
-
-cargarEscudo();
-
+dibujarPersonas();
 
 </script>
 
