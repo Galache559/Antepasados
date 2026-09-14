@@ -173,12 +173,12 @@ body{min-width:700px}
 
 /* ===== MODO APP / PANTALLA COMPLETA v9 ===== */
 html,body{width:100%;min-height:100%;margin:0;padding:0;overscroll-behavior:none}
-body.app-mode{overflow:hidden}
+body.app-mode{overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .app{width:100%;max-width:none;min-height:100vh;margin:0;padding:12px;display:flex;flex-direction:column}
 .header{flex:none}
 .tabs{flex:none}
-.panel.active{flex:1;min-height:0}
-.panel.active>.section{min-height:calc(100vh - 185px)}
+.panel.active{flex:0 0 auto;min-height:0}
+.panel.active>.section{min-height:0}
 .fullscreen-btn{position:fixed;right:14px;bottom:14px;z-index:900;border:1px solid var(--gold);background:var(--gold);color:#111820;border-radius:12px;padding:11px 14px;font-weight:bold;box-shadow:var(--shadow)}
 .fullscreen-btn:hover{filter:brightness(1.08)}
 @media (display-mode: fullscreen){
@@ -195,7 +195,7 @@ body.app-mode{overflow:hidden}
   .app{min-height:100vh;width:100%;padding:10px}
   .header{border-radius:14px}
   .tabs{overflow-x:auto;flex-wrap:nowrap}
-  .panel.active>.section{min-height:calc(100vh - 165px)}
+  .panel.active>.section{min-height:0}
 }
 
 
