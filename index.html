@@ -102,24 +102,56 @@ button{cursor:pointer}
 .family-title{font-weight:bold;color:var(--text)}
 .family-sub{font-size:12px;color:var(--muted);margin-top:4px}
 .children-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.child-row{display:grid;grid-template-columns:1fr 180px auto;gap:7px;align-items:center}
+.child-row{display:grid;grid-template-columns:1fr 150px 1fr 120px auto;gap:7px;align-items:center}
 .child-row input{background:#121a22;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
 .family-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .notice{padding:10px 12px;border:1px dashed var(--gold);border-radius:10px;background:rgba(216,179,106,.05);color:var(--muted);font-size:12px;line-height:1.5}
 .family-persons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
+/* ===== NUEVA VISTA FAMILIAR ===== */
+.family-view{display:flex;flex-direction:column;gap:14px}
+.family-couple{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.family-person-window{background:var(--card2);border:1px solid var(--line);border-radius:15px;padding:15px;min-width:0}
+.family-person-window.male{border-left:4px solid var(--gold)}
+.family-person-window.female{border-left:4px solid var(--purple)}
+.family-person-window h3{margin:0 0 12px;color:var(--gold2);font-size:16px}
+.family-person-name{font-size:18px;font-weight:bold;margin-bottom:10px;word-break:break-word}
+.family-person-data{display:grid;gap:7px;color:var(--muted);font-size:13px}
+.family-person-data strong{color:#d7dde5}
+.spouse-stack{display:flex;flex-direction:column;gap:10px}
+.spouse-card{background:#18212b;border:1px solid var(--line);border-radius:12px;padding:12px}
+.spouse-card .spouse-title{font-size:12px;color:var(--gold);font-weight:bold;margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+.children-window{background:var(--card2);border:1px solid var(--line);border-radius:15px;padding:15px}
+.children-window h3{margin:0 0 12px;color:var(--gold2);font-size:18px}
+.children-table{width:100%;border-collapse:collapse;font-size:13px}
+.children-table th,.children-table td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.07);text-align:left;vertical-align:top}
+.children-table th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.children-table td{color:var(--text)}
+.children-table tr:last-child td{border-bottom:0}
+.child-mother{color:var(--gold2);font-weight:bold}
+.add-spouse-box{margin-top:10px;padding:10px;border:1px dashed var(--gold);border-radius:10px;color:var(--muted);font-size:12px}
+.orientation-note{margin-bottom:12px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(216,179,106,.04);color:var(--muted);font-size:12px;text-align:center}
+
 @media(max-width:700px){
-.app{padding:10px}
-.header{padding:14px}
-.escudo{width:72px;height:72px}
-.header-title h1{font-size:24px}
-.form-grid{grid-template-columns:1fr}
-.field.full{grid-column:auto}
-.person-card{width:100%}
-.tree-row{flex-direction:column;align-items:center}
-.child-row{grid-template-columns:1fr}
-.family-persons{grid-template-columns:1fr}
+.app{padding:8px;min-width:680px}
+.header{padding:12px}
+.escudo{width:68px;height:68px}
+.header-title h1{font-size:23px}
+.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.field.full{grid-column:1/-1}
+.person-card{width:330px}
+.tree-row{flex-direction:row;align-items:stretch}
+.child-row{grid-template-columns:1fr 150px 1fr 120px auto}
+.family-persons{grid-template-columns:1fr 1fr}
+.family-couple{grid-template-columns:1fr 1fr}
 }
+
+/* En pantallas estrechas se mantiene el diseño apaisado y se permite desplazamiento horizontal. */
+@media(max-width:699px) and (orientation:portrait){
+html,body{overflow-x:auto}
+body{min-width:700px}
+}
+
 </style>
 </head>
 
@@ -165,6 +197,8 @@ Copia
 <main id="arbol" class="panel active">
 
 <section class="section">
+
+<div class="orientation-note">📱 Vista apaisada recomendada en móvil · Hombre a la izquierda · Esposa a la derecha · Hijos debajo</div>
 
 <div class="tree-header">
 
@@ -525,23 +559,19 @@ return u;
 function addHijoUnion(
 u,
 nombre,
-fecha=""
+fecha="",
+lugar="",
+madre=""
 ){
-
 if(!u)return;
-
 u.hijos=u.hijos||[];
-
 u.hijos.push({
-
-id:uid("h"),
-
-nombre:nombre||"",
-
-fechaNacimiento:fecha||""
-
+ id:uid("h"),
+ nombre:nombre||"",
+ fechaNacimiento:fecha||"",
+ lugarNacimiento:lugar||"",
+ madreIniciales:madre||""
 });
-
 }
 
 function crearDatosIniciales(){
@@ -744,7 +774,10 @@ placido
 
 addHijoUnion(
 u2,
-joseAntonio.nombre+" "+joseAntonio.apellidos
+joseAntonio.nombre,
+"",
+"",
+"M.J."
 );
 
 const u3=
@@ -755,7 +788,10 @@ francisca
 
 addHijoUnion(
 u3,
-violeta.nombre+" "+violeta.apellidos
+violeta.nombre,
+violeta.nacimiento,
+violeta.nacimientoLugar,
+"F.R."
 );
 
 const u4=
@@ -766,7 +802,10 @@ isabel
 
 addHijoUnion(
 u4,
-pedroRomero.nombre+" "+pedroRomero.apellidos
+pedroRomero.nombre,
+pedroRomero.nacimiento,
+pedroRomero.nacimientoLugar,
+"I.R."
 );
 
 const u5=
@@ -777,7 +816,10 @@ teodora
 
 addHijoUnion(
 u5,
-pedroAyres.nombre+" "+pedroAyres.apellidos
+pedroAyres.nombre,
+pedroAyres.nacimiento,
+pedroAyres.nacimientoLugar,
+"T.A."
 );
 
 const u6=
@@ -788,7 +830,10 @@ florentina
 
 addHijoUnion(
 u6,
-celestino.nombre+" "+celestino.apellidos
+celestino.nombre,
+celestino.nacimiento,
+celestino.nacimientoLugar,
+"F.G."
 );
 
 const u7=
@@ -799,7 +844,10 @@ josefa
 
 addHijoUnion(
 u7,
-santiago.nombre+" "+santiago.apellidos
+santiago.nombre,
+santiago.nacimiento,
+santiago.nacimientoLugar,
+"J.G."
 );
 
 const u8=
@@ -810,7 +858,10 @@ maria
 
 addHijoUnion(
 u8,
-joseph.nombre+" "+joseph.apellidos
+joseph.nombre,
+joseph.nacimiento,
+joseph.nacimientoLugar,
+"M.M."
 );
 
 guardar();
@@ -887,6 +938,12 @@ h.nombre=h.nombre||"";
 
 h.fechaNacimiento=
 h.fechaNacimiento||"";
+
+h.lugarNacimiento=
+h.lugarNacimiento||"";
+
+h.madreIniciales=
+h.madreIniciales||"";
 
 });
 
@@ -1254,129 +1311,33 @@ html.push(`
 }
 
 function dibujarArbol(){
-
-const cont=
-document.getElementById(
-"tree"
-);
-
+const cont=document.getElementById("tree");
 if(!cont)return;
-
 const nombres=[
-
-"José Antonio Vázquez Galache",
-"María Jesús Ruiz Montilla",
-
-"Violeta Galache Rubio",
-"Plácido Vázquez Martínez",
-
-"Pedro Galache Romero",
-"Francisca Rubio Rubio",
-
-"Pedro Galache Ayres",
-"Isabel Romero Sánchez",
-
-"Celestino Galache García",
-"Teodora Ayres",
-
-"Santiago Galache García",
-"Florentina García",
-
-"Joseph Galache Melgar",
-"Josefa García Paradinas",
-
-"Francisco Galache Fraile",
-"María Melgar"
-
+"José Antonio Vázquez Galache","María Jesús Ruiz Montilla",
+"Violeta Galache Rubio","Plácido Vázquez Martínez",
+"Pedro Galache Romero","Francisca Rubio Rubio",
+"Pedro Galache Ayres","Isabel Romero Sánchez",
+"Celestino Galache García","Teodora Ayres",
+"Santiago Galache García","Florentina García",
+"Joseph Galache Melgar","Josefa García Paradinas",
+"Francisco Galache Fraile","María Melgar"
 ];
-
-const ps=
-nombres.map(
-buscarPersonaNombre
-);
-
+const ps=nombres.map(buscarPersonaNombre);
 let html=[];
-
-for(
-let i=0;
-i<ps.length;
-i+=2
-){
-
-let gen=
-i/2+1;
-
-dibujarGeneracion(
-
-html,
-
-`Generación ${gen}${
-gen===1
-?" · José Antonio"
-:gen===8
-?" · Inicio documentado actual"
-:gen===2
-?" · Padres"
-:""
-}`,
-
-ps[i],
-ps[i+1],
-
-gen===1
-?"current"
-:""
-
-);
-
-if(
-i<ps.length-2
-){
-
-html.push(
-`<div class="connector"></div>`
-);
-
+for(let i=0;i<ps.length;i+=2){
+const a=ps[i],b=ps[i+1];
+const u=db.uniones.find(x=>(x.persona1Id===a?.id&&x.persona2Id===b?.id)||(x.persona1Id===b?.id&&x.persona2Id===a?.id));
+if(u){
+html.push(`<div class="generation"><div class="generation-title">Generación ${i/2+1}</div>${renderUnionCard(u)}</div>`);
+}else{
+html.push(`<div class="generation"><div class="generation-title">Generación ${i/2+1}</div><div class="tree-row">${tarjetaPersona(a,"galache male")}${tarjetaPersona(b,"female")}</div></div>`);
 }
-
+if(i<ps.length-2)html.push(`<div class="connector"></div>`);
 }
-
-const francisco=
-buscarPersonaNombre(
-"Francisco Galache Fraile"
-);
-
-html.push(`
-
-<div class="add-ancestor">
-
-<div class="add-ancestor-title">
-¿Continuamos hacia atrás?
-</div>
-
-<div class="add-ancestor-text">
-Añade aquí los padres de Francisco Galache Fraile cuando los documentemos.
-</div>
-
-<button
-class="btn gold"
-onclick="nuevaPersona(true,'${
-francisco
-?francisco.id
-:""
-}')">
-
-+ Añadir antepasado
-
-</button>
-
-</div>
-
-`);
-
-cont.innerHTML=
-html.join("");
-
+const francisco=buscarPersonaNombre("Francisco Galache Fraile");
+html.push(`<div class="add-ancestor"><div class="add-ancestor-title">¿Continuamos hacia atrás?</div><div class="add-ancestor-text">Añade aquí los padres de Francisco Galache Fraile cuando los documentemos.</div><button class="btn gold" onclick="nuevaPersona(true,'${francisco?francisco.id:""}')">+ Añadir antepasado</button></div>`);
+cont.innerHTML=html.join("");
 }
 
 function dibujarPersonas(){
@@ -1734,119 +1695,63 @@ u=>renderUnionCard(u,id)
 
 }
 
+function inicialesMadre(p){
+if(!p)return"";
+const nombre=(p.nombre||"").trim();
+const ap=(p.apellidos||"").trim();
+const partes=ap.split(/\s+/).filter(Boolean);
+const letras=[];
+if(nombre)letras.push(nombre.charAt(0).toUpperCase());
+if(partes[0])letras.push(partes[0].charAt(0).toUpperCase());
+return letras.join(".")+ (letras.length?".":"");
+}
+
+function renderPersonaWindow(p,titulo,clase=""){
+if(!p)return `<div class="family-person-window ${clase}"><h3>${esc(titulo)}</h3><div class="empty">Sin datos</div></div>`;
+return `<div class="family-person-window ${clase}">
+<h3>${esc(titulo)}</h3>
+<div class="family-person-name">${esc(nombreCompleto(p))}</div>
+<div class="family-person-data">
+<div><strong>📅 Fecha de nacimiento:</strong> ${esc(p.nacimiento||"—")}</div>
+<div><strong>📍 Lugar de nacimiento:</strong> ${esc(p.nacimientoLugar||"—")}</div>
+</div>
+</div>`;
+}
+
 function renderUnionCard(
 u,
 contextId=""
 ){
-
-const ps=
-parejaDeUnion(u);
-
-const otro=
-otroProgenitor(
-u,
-contextId
-);
-
-const hijos=
-u.hijos||[];
-
+const p1=getPersona(u.persona1Id);
+const p2=getPersona(u.persona2Id);
+const hombre=(p1&&/galache/i.test(p1.apellidos||""))?p1:(p2&&/galache/i.test(p2.apellidos||""))?p2:p1;
+const esposa=hombre&&p2&&p2.id===hombre.id?p1:p2;
+const hijos=u.hijos||[];
+const esposaIniciales=inicialesMadre(esposa);
 return `
-
 <div class="family-card">
-
-<div class="family-head">
-
-<div>
-
-<div class="family-title">
-
-💍 ${
-esc(
-ps.map(nombreCompleto)
-.join(" + ")
-||"Unión incompleta"
-)
-}
-
+<div class="family-head"><div>
+<div class="family-title">💍 ${esc([p1,p2].filter(Boolean).map(nombreCompleto).join(" + ")||"Unión incompleta")}</div>
+${u.matrimonio||u.matrimonioLugar?`<div class="family-sub">Matrimonio: ${esc(u.matrimonio||"—")} · ${esc(u.matrimonioLugar||"—")}</div>`:""}
 </div>
-
-${
-u.matrimonio ||
-u.matrimonioLugar
-?`
-
-<div class="family-sub">
-
-Matrimonio:
-${esc(u.matrimonio||"—")}
-·
-${esc(u.matrimonioLugar||"—")}
-
+<button class="btn gold" onclick="editarFamilia('${u.id}')">Editar familia</button>
 </div>
-
-`
-:""
-}
-
+<div class="family-view">
+<div class="family-couple">
+${renderPersonaWindow(hombre,"GALACHE","male")}
+<div class="spouse-stack">
+${renderPersonaWindow(esposa,"ESPOSA 1","female")}
+${u.persona2Id&&u.persona1Id&&false?"":""}
 </div>
-
-<button
-class="btn gold"
-onclick="editarFamilia('${u.id}')">
-
-Editar familia
-
-</button>
-
 </div>
-
-<div class="family-sub">
-
-<strong>
-Hijos (${hijos.length}):
-</strong>
-
+<div class="children-window">
+<h3>Hijos <span class="small">(${hijos.length})</span></h3>
+${hijos.length?`<table class="children-table"><thead><tr><th>Nombre</th><th>Madre</th><th>Fecha de nacimiento</th><th>Lugar de nacimiento</th></tr></thead><tbody>${hijos.map(h=>`<tr><td>${esc((h.nombre||"").split(/\s+/)[0]||"—")}</td><td class="child-mother">${esc(h.madreIniciales||esposaIniciales||"—")}</td><td>${esc(h.fechaNacimiento||"—")}</td><td>${esc(h.lugarNacimiento||"—")}</td></tr>`).join("")}</tbody></table>`:`<div class="small">Sin hijos registrados.</div>`}
+<div class="add-spouse-box">Si esta persona tuvo otra esposa, añádela como una nueva pareja/unión. Cada unión conservará su propia lista de hijos.</div>
 </div>
-
-<div class="children-list">
-
-${
-hijos.length
-
-?hijos.map(
-h=>`
-
-<div class="child-row">
-
-<div>
-${esc(h.nombre||"—")}
 </div>
-
-<div>
-${esc(h.fechaNacimiento||"—")}
 </div>
-
-</div>
-
-`
-).join("")
-
-:`
-
-<div class="small">
-Sin hijos registrados.
-</div>
-
-`
-}
-
-</div>
-
-</div>
-
 `;
-
 }
 
 function abrirModal(html){
@@ -2374,7 +2279,7 @@ Hijos iniciales
 
 <textarea
 id="uHijos"
-placeholder="Un hijo por línea: Nombre | Fecha de nacimiento">
+placeholder="Un hijo por línea: Nombre | Fecha de nacimiento | Lugar | Iniciales madre">
 </textarea>
 
 </div>
@@ -2482,33 +2387,18 @@ function parseHijosTexto(
 u,
 texto
 ){
-
 String(texto||"")
 .split(/\r?\n/)
 .map(x=>x.trim())
 .filter(Boolean)
-.forEach(
-line=>{
-
-const a=
-line.split("|");
-
-const nombre=
-(a.shift()||"").trim();
-
-const fecha=
-a.join("|").trim();
-
-if(nombre)
-addHijoUnion(
-u,
-nombre,
-fecha
-);
-
-}
-);
-
+.forEach(line=>{
+const a=line.split("|");
+const nombre=(a.shift()||"").trim();
+const fecha=(a.shift()||"").trim();
+const lugar=(a.shift()||"").trim();
+const madre=(a.join("|")||"").trim();
+if(nombre)addHijoUnion(u,nombre,fecha,lugar,madre);
+});
 }
 
 function editarFamilia(id){
@@ -2557,6 +2447,16 @@ placeholder="Nombre">
 class="child-date"
 value="${esc(h.fechaNacimiento)}"
 placeholder="Fecha de nacimiento">
+
+<input
+class="child-place"
+value="${esc(h.lugarNacimiento||"")}"
+placeholder="Lugar de nacimiento">
+
+<input
+class="child-mother-input"
+value="${esc(h.madreIniciales||"")}"
+placeholder="Iniciales madre">
 
 <button
 class="btn red"
@@ -2748,6 +2648,14 @@ placeholder="Nombre">
 class="child-date"
 placeholder="Fecha de nacimiento">
 
+<input
+class="child-place"
+placeholder="Lugar de nacimiento">
+
+<input
+class="child-mother-input"
+placeholder="Iniciales madre">
+
 <button
 class="btn red"
 type="button"
@@ -2838,18 +2746,23 @@ row.querySelector(
 ".child-date"
 ).value.trim();
 
+const l=
+row.querySelector(
+".child-place"
+)?.value.trim()||"";
+
+const m=
+row.querySelector(
+".child-mother-input"
+)?.value.trim()||"";
+
 if(n)
-
 u.hijos.push({
-
-id:
-row.dataset.child ||
-uid("h"),
-
+id:row.dataset.child||uid("h"),
 nombre:n,
-
-fechaNacimiento:f
-
+fechaNacimiento:f,
+lugarNacimiento:l,
+madreIniciales:m
 });
 
 }
