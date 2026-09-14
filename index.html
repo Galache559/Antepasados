@@ -180,16 +180,41 @@ body.app-mode{overflow:hidden}
   .panel.active>.section{min-height:calc(100vh - 165px)}
 }
 
+
+/* ===== MEJORAS v10 ===== */
+.app-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.header-tools{position:absolute;right:16px;top:16px;display:flex;gap:7px;align-items:center}.header{position:relative}.header-tool{border:1px solid var(--line);background:#263240;color:var(--text);border-radius:10px;padding:9px 11px;font-weight:bold}.header-tool:hover{border-color:var(--gold);color:var(--gold2)}
+.search-box{display:flex;gap:8px;align-items:center;margin:14px 0 0}
+.search-box input{flex:1;min-width:220px;background:#121a22;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 12px;outline:none}
+.search-box input:focus{border-color:var(--gold)}
+.search-results{margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.search-result{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.search-result .small{flex:1}
+.source-box{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:11px;background:rgba(115,169,223,.04)}
+.source-box h4{margin:0 0 7px;color:var(--gold2);font-size:13px}
+.source-item{padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.source-item:last-child{border-bottom:0}
+.source-type{color:var(--gold);font-weight:bold}
+.family-person-name{word-break:break-word}
+.spouse-number{display:inline-block;margin-left:7px;padding:3px 7px;border-radius:20px;background:#293442;color:var(--gold2);font-size:10px;font-weight:bold}
+@media(max-width:700px){
+ .header-tools{right:10px;top:10px}.header-tool{padding:8px 9px;font-size:12px}.header-title{padding-top:4px}
+.search-box{min-width:640px}.search-results{min-width:640px}.source-box{font-size:12px}
+}
+
 </style>
 </head>
 
 <body>
 
-<button class="fullscreen-btn" id="fullscreenBtn" type="button" onclick="activarPantallaCompleta()">⛶ Pantalla completa</button>
-
 <div class="app">
 
 <header class="header">
+<div class="header-tools">
+<button class="header-tool" type="button" onclick="irInicio()">⌂ Inicio</button>
+<button class="header-tool" type="button" onclick="abrirBuscador()">🔎 Buscar</button>
+<button id="fullscreenBtn" class="header-tool" type="button" onclick="activarPantallaCompleta()">⛶</button>
+</div>
 <div class="header-top">
 
 <div class="escudo" id="escudo">
@@ -255,6 +280,7 @@ Copia
 <h2 style="margin-bottom:0">
 Personas
 </h2>
+<div class="search-box"><input id="buscadorPersonas" type="search" placeholder="🔎 Buscar persona por nombre o apellido..." oninput="buscarPersonas()"><button class="btn" type="button" onclick="limpiarBuscador()">Limpiar</button></div><div id="searchResults" class="search-results"></div>
 
 <button class="btn gold" onclick="nuevaPersona(false)">
 + Nueva persona
@@ -301,6 +327,8 @@ Los hijos pertenecen a la pareja o unión familiar, no a la ficha individual de 
 <section class="section">
 
 <h2>Copia de seguridad</h2>
+<div class="notice">💾 <strong>Seguridad:</strong> los datos se guardan automáticamente en este dispositivo. La copia JSON permite trasladarlos a otro dispositivo.</div>
+<div class="small" id="lastBackupInfo" style="margin-top:8px"></div>
 
 <div class="backup-box">
 
@@ -398,6 +426,21 @@ onclick="cerrarModal()">
 <script>
 
 /* ===== FUNCIONES DE MODO APP v9 ===== */
+function irInicio(){
+ const tab=document.querySelector('.tab[data-tab="arbol"]');
+ if(tab)tab.click();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function abrirBuscador(){
+ const tab=document.querySelector('.tab[data-tab="personas"]');
+ if(tab)tab.click();
+ setTimeout(()=>{
+  const input=document.getElementById("buscadorPersonas");
+  if(input){input.focus();input.scrollIntoView({behavior:"smooth",block:"center"});}
+ },80);
+}
+
 function activarPantallaCompleta(){
   const el=document.documentElement;
   const request=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
@@ -951,6 +994,8 @@ p.certeza||"Pendiente";
 
 p.notas=p.notas||"";
 
+p.fuentes=p.fuentes||"";
+
 p.principal=!!p.principal;
 
 p.unionIds=
@@ -1124,13 +1169,11 @@ guardar();
 }
 
 function guardar(){
-
-localStorage.setItem(
-STORAGE_KEY,
-JSON.stringify(db)
-);
-
+localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+const ahora=new Date().toLocaleString("es-ES");
+localStorage.setItem("antepasados_galache_ultima_guardado",ahora);
 }
+
 
 function cargar(){
 
@@ -1390,6 +1433,17 @@ const francisco=buscarPersonaNombre("Francisco Galache Fraile");
 html.push(`<div class="add-ancestor"><div class="add-ancestor-title">¿Continuamos hacia atrás?</div><div class="add-ancestor-text">Añade aquí los padres de Francisco Galache Fraile cuando los documentemos.</div><button class="btn gold" onclick="nuevaPersona(true,'${francisco?francisco.id:""}')">+ Añadir antepasado</button></div>`);
 cont.innerHTML=html.join("");
 }
+
+function buscarPersonas(){
+const input=document.getElementById("buscadorPersonas");
+const cont=document.getElementById("searchResults");
+if(!input||!cont)return;
+const q=input.value.trim().toLowerCase();
+if(!q){cont.innerHTML="";return;}
+const encontrados=db.personas.filter(p=>nombreCompleto(p).toLowerCase().includes(q)).slice(0,30);
+cont.innerHTML=encontrados.length?encontrados.map(p=>`<div class="search-result"><div><strong>${esc(nombreCompleto(p))}</strong><div class="small">${esc(p.nacimiento||"Fecha no indicada")} · ${esc(p.nacimientoLugar||"Lugar no indicado")}</div></div><button class="btn gold" type="button" onclick="mostrarDetalle('${p.id}')">Ver ficha</button></div>`).join(""):"<div class='empty'>No se han encontrado personas.</div>";
+}
+function limpiarBuscador(){const i=document.getElementById("buscadorPersonas");if(i)i.value="";buscarPersonas();}
 
 function dibujarPersonas(){
 
@@ -1713,6 +1767,10 @@ onclick="nuevaFamilia('${p.id}')">
 
 `;
 
+if(p.fuentes){
+html+=`<div class="source-box"><h4>📚 Fuentes documentales</h4>${p.fuentes.split(/\r?\n/).filter(Boolean).map((x,i)=>`<div class="source-item"><span class="source-type">Fuente ${i+1}:</span> ${esc(x)}</div>`).join("")}</div>`;
+}
+
 abrirModal(html);
 
 }
@@ -1779,6 +1837,8 @@ const hombre=(p1&&/galache/i.test(p1.apellidos||""))?p1:(p2&&/galache/i.test(p2.
 const esposa=hombre&&p2&&p2.id===hombre.id?p1:p2;
 const hijos=u.hijos||[];
 const esposaIniciales=inicialesMadre(esposa);
+const hombreUniones=hombre?personaUniones(hombre.id):[];
+const esposaN=hombreUniones.findIndex(x=>x.id===u.id)+1;
 return `
 <div class="family-card">
 <div class="family-head"><div>
@@ -1791,7 +1851,7 @@ ${u.matrimonio||u.matrimonioLugar?`<div class="family-sub">Matrimonio: ${esc(u.m
 <div class="family-couple">
 ${renderPersonaWindow(hombre,"GALACHE","male")}
 <div class="spouse-stack">
-${renderPersonaWindow(esposa,"ESPOSA 1","female")}
+${renderPersonaWindow(esposa,`ESPOSA ${esposaN||1}`,"female")}
 ${u.persona2Id&&u.persona1Id&&false?"":""}
 </div>
 </div>
@@ -2019,6 +2079,13 @@ placeholder="Nombre de la madre">
 </div>
 
 <div class="field full">
+<label>
+Fuentes documentales
+</label>
+<textarea id="fFuentes" placeholder="Una fuente por línea. Ej.: Bautismo — Villavieja de Yeltes — 31/01/1856">${esc(p.fuentes||"")}</textarea>
+</div>
+
+<div class="field full">
 
 <label>
 Notas
@@ -2155,6 +2222,8 @@ p.notas=
 document.getElementById(
 "fNotas"
 ).value.trim();
+
+p.fuentes=document.getElementById("fFuentes")?.value.trim()||"";
 
 p.certeza=
 document.getElementById(
@@ -2963,6 +3032,7 @@ a.href=url;
 
 a.download=
 `Antepasados_GALACHE_${fecha}.json`;
+localStorage.setItem("antepasados_galache_ultima_exportacion",new Date().toLocaleString("es-ES"));
 
 document.body.appendChild(a);
 
@@ -3076,8 +3146,20 @@ dibujarFamilias();
 
 }
 
-cargar();
+function activarPantallaCompleta(){
+const el=document.documentElement;
+if(document.fullscreenElement){document.exitFullscreen?.();return;}
+if(el.requestFullscreen){el.requestFullscreen().catch(()=>{});return;}
+alert("El navegador no permite pantalla completa directa. Puedes usar la opción 'Añadir a pantalla de inicio' del navegador.");
+}
+document.addEventListener("fullscreenchange",()=>{
+ document.body.classList.toggle("app-mode",!!document.fullscreenElement);
+ const b=document.getElementById("fullscreenBtn"); if(b)b.textContent=document.fullscreenElement?"↙ Salir de pantalla completa":"⛶ Pantalla completa";
+});
 
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}
+
+cargar();
 cargarEscudoGuardado();
 
 dibujarTodo();
