@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>GALACHE - Árbol Genealógico Familiar</title>
+<title>Antepasados GALACHE</title>
 <style>
 :root{--bg:#10151c;--card:#1b2430;--card2:#202b38;--line:#334354;--gold:#d8b36a;--gold2:#f0cf88;--text:#f2f4f7;--muted:#aeb8c4;--green:#75c99a;--blue:#73a9df;--red:#e58b8b;--purple:#c98db7;--shadow:0 10px 30px rgba(0,0,0,.28)}
 *{box-sizing:border-box}
@@ -152,10 +152,40 @@ html,body{overflow-x:auto}
 body{min-width:700px}
 }
 
+
+/* ===== MODO APP / PANTALLA COMPLETA v9 ===== */
+html,body{width:100%;min-height:100%;margin:0;padding:0;overscroll-behavior:none}
+body.app-mode{overflow:hidden}
+.app{width:100%;max-width:none;min-height:100vh;margin:0;padding:12px;display:flex;flex-direction:column}
+.header{flex:none}
+.tabs{flex:none}
+.panel.active{flex:1;min-height:0}
+.panel.active>.section{min-height:calc(100vh - 185px)}
+.fullscreen-btn{position:fixed;right:14px;bottom:14px;z-index:900;border:1px solid var(--gold);background:var(--gold);color:#111820;border-radius:12px;padding:11px 14px;font-weight:bold;box-shadow:var(--shadow)}
+.fullscreen-btn:hover{filter:brightness(1.08)}
+@media (display-mode: fullscreen){
+  .app{padding-top:max(10px,env(safe-area-inset-top));padding-right:max(10px,env(safe-area-inset-right));padding-bottom:max(10px,env(safe-area-inset-bottom));padding-left:max(10px,env(safe-area-inset-left))}
+  .fullscreen-btn{display:none}
+}
+@media (display-mode: standalone){
+  .app{padding-top:max(10px,env(safe-area-inset-top));padding-right:max(10px,env(safe-area-inset-right));padding-bottom:max(10px,env(safe-area-inset-bottom));padding-left:max(10px,env(safe-area-inset-left))}
+  .fullscreen-btn{display:none}
+}
+@media(max-width:700px){
+  html,body{min-width:680px}
+  body{overflow-x:auto}
+  .app{min-height:100vh;width:100%;padding:10px}
+  .header{border-radius:14px}
+  .tabs{overflow-x:auto;flex-wrap:nowrap}
+  .panel.active>.section{min-height:calc(100vh - 165px)}
+}
+
 </style>
 </head>
 
 <body>
+
+<button class="fullscreen-btn" id="fullscreenBtn" type="button" onclick="activarPantallaCompleta()">⛶ Pantalla completa</button>
 
 <div class="app">
 
@@ -366,6 +396,27 @@ onclick="cerrarModal()">
 </div>
 
 <script>
+
+/* ===== FUNCIONES DE MODO APP v9 ===== */
+function activarPantallaCompleta(){
+  const el=document.documentElement;
+  const request=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
+  if(request){
+    try{
+      const r=request.call(el);
+      if(r&&typeof r.catch==="function")r.catch(()=>{});
+    }catch(e){}
+  }
+  document.body.classList.add("app-mode");
+}
+function actualizarBotonPantalla(){
+  const b=document.getElementById("fullscreenBtn");
+  if(!b)return;
+  const activo=!!(document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement);
+  b.style.display=activo?"none":"block";
+}
+document.addEventListener("fullscreenchange",actualizarBotonPantalla);
+document.addEventListener("webkitfullscreenchange",actualizarBotonPantalla);
 
 const STORAGE_KEY =
 "antepasados_galache_v7";
