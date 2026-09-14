@@ -291,7 +291,7 @@ Copia
 
 <section class="section">
 
-<div class="orientation-note">📱 Vista apaisada recomendada en móvil · Hombre a la izquierda · Esposa a la derecha · Hijos debajo</div>
+<div class="orientation-note">📱 Vista apaisada recomendada en móvil · Persona principal a la izquierda · Cónyuge a la derecha · Hijos debajo</div>
 
 <div class="tree-header">
 
@@ -1929,14 +1929,14 @@ ${u.matrimonio||u.matrimonioLugar?`<div class="family-sub">Matrimonio: ${esc(u.m
 <div class="family-couple">
 ${renderPersonaWindow(hombre,"GALACHE","male")}
 <div class="spouse-stack">
-${renderPersonaWindow(esposa,`ESPOSA ${esposaN||1}`,"female")}
+${renderPersonaWindow(esposa,`CÓNYUGE ${esposaN||1}`,"female")}
 ${u.persona2Id&&u.persona1Id&&false?"":""}
 </div>
 </div>
 <div class="children-window">
 <h3>Hijos <span class="small">(${hijos.length})</span></h3>
 ${hijos.length?`<table class="children-table"><thead><tr><th>Nombre</th><th>Madre</th><th>Fecha de nacimiento</th><th>Lugar de nacimiento</th></tr></thead><tbody>${hijos.map(h=>`<tr><td>${esc((h.nombre||"").split(/\s+/)[0]||"—")}</td><td class="child-mother">${esc(h.madreIniciales||esposaIniciales||"—")}</td><td>${esc(h.fechaNacimiento||"—")}</td><td>${esc(h.lugarNacimiento||"—")}</td></tr>`).join("")}</tbody></table>`:`<div class="small">Sin hijos registrados.</div>`}
-<div class="add-spouse-box">Si esta persona tuvo otra esposa, añádela como una nueva pareja/unión. Cada unión conservará su propia lista de hijos.</div>
+<div class="add-spouse-box">Si esta persona tuvo otro cónyuge, añádelo como una nueva pareja/unión. Cada unión conservará su propia lista de hijos.</div>
 </div>
 </div>
 </div>
