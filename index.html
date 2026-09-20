@@ -102,7 +102,11 @@ button{cursor:pointer}
 .family-title{font-weight:bold;color:var(--text)}
 .family-sub{font-size:12px;color:var(--muted);margin-top:4px}
 .children-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.child-row{display:grid;grid-template-columns:1fr 150px 1fr 120px auto;gap:7px;align-items:center}
+.child-row{display:grid;grid-template-columns:minmax(240px,2fr) 150px minmax(190px,1.2fr) 120px auto;gap:7px;align-items:center}
+.child-row .child-name{min-width:0}
+.children-table{table-layout:auto}
+.children-table th:first-child,.children-table td:first-child{min-width:240px}
+.children-table td:first-child{white-space:normal;overflow-wrap:anywhere}
 .child-row input{background:#121a22;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
 .family-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .notice{padding:10px 12px;border:1px dashed var(--gold);border-radius:10px;background:rgba(216,179,106,.05);color:var(--muted);font-size:12px;line-height:1.5}
@@ -159,7 +163,7 @@ button{cursor:pointer}
 .field.full{grid-column:1/-1}
 .person-card{width:330px}
 .tree-row{flex-direction:row;align-items:stretch}
-.child-row{grid-template-columns:1fr 150px 1fr 120px auto}
+.child-row{grid-template-columns:minmax(240px,2fr) 150px minmax(190px,1.2fr) 120px auto}
 .family-persons{grid-template-columns:1fr 1fr}
 .family-couple{grid-template-columns:1fr 1fr}
 }
@@ -876,10 +880,10 @@ const francisco=
 crearPersona(
 "Francisco",
 "Galache Fraile",
-"1705",
-"Ituero de Huebra (Salamanca)",
+"",
+"",
 "Documentado",
-"Hijo legítimo de Francisco Galache y María Fraile."
+"Hijo de Francisco Galache y María Fraile. Matrimonio con María Melgar el 04/05/1733 en Santo Tomás Apóstol, Villares de Yeltes."
 );
 
 francisco.principal=true;
@@ -998,8 +1002,143 @@ joseph.nacimientoLugar,
 "M.M."
 );
 
+pedroAyres.padre="Celestino Galache García";
+pedroAyres.madre="Teodora Ayres";
+celestino.padre="Santiago Galache García";
+celestino.madre="Florentina García";
+teodora.padre="Juan José Ayres";
+teodora.madre="María López";
+santiago.padre="Joseph Galache Melgar";
+santiago.madre="Josefa García Paradinas";
+santiago.nacimiento="14/03/1775";
+joseph.padre="Francisco Galache Fraile";
+joseph.madre="María Melgar";
+joseph.nacimiento="14/03/1739";
+
 guardar();
 
+}
+
+function completarDatosInvestigacion(){
+
+function asegurarPersona(nombre,apellidos,nacimiento="",lugar="",certeza="Documentado",notas=""){
+  let p=buscarPersonaNombre(`${nombre} ${apellidos}`.trim());
+  if(!p)p=crearPersona(nombre,apellidos,nacimiento,lugar,certeza,notas);
+  else{
+    if(nacimiento&&!p.nacimiento)p.nacimiento=nacimiento;
+    if(lugar&&!p.nacimientoLugar)p.nacimientoLugar=lugar;
+    if(certeza&&(!p.certeza||p.certeza==="Pendiente"))p.certeza=certeza;
+    if(notas&&!p.notas)p.notas=notas;
+  }
+  return p;
+}
+
+function asegurarUnion(p1,p2,matrimonio="",lugar=""){
+  if(!p1||!p2)return null;
+  let u=db.uniones.find(x=>
+    (x.persona1Id===p1.id&&x.persona2Id===p2.id)||
+    (x.persona1Id===p2.id&&x.persona2Id===p1.id)
+  );
+  if(!u)u=crearUnion(p1,p2,matrimonio,lugar);
+  else{
+    if(matrimonio&&!u.matrimonio)u.matrimonio=matrimonio;
+    if(lugar&&!u.matrimonioLugar)u.matrimonioLugar=lugar;
+  }
+  return u;
+}
+
+const franciscoFrayle=buscarPersonaNombre("Francisco Galache Fraile");
+if(franciscoFrayle){
+  if(!franciscoFrayle.padre)franciscoFrayle.padre="Francisco Galache";
+  if(!franciscoFrayle.madre)franciscoFrayle.madre="María Fraile";
+  if(!franciscoFrayle.notas)franciscoFrayle.notas="Hijo de Francisco Galache y María Fraile. Matrimonio con María Melgar el 04/05/1733 en Santo Tomás Apóstol, Villares de Yeltes.";
+}
+
+const mariaMelgar=buscarPersonaNombre("María Melgar");
+if(mariaMelgar&&!mariaMelgar.notas)
+  mariaMelgar.notas="Matrimonio con Francisco Galache Fraile el 04/05/1733 en Santo Tomás Apóstol, Villares de Yeltes.";
+
+const joseph=buscarPersonaNombre("Joseph Galache Melgar");
+if(joseph){
+  if(!joseph.padre)joseph.padre="Francisco Galache Fraile";
+  if(!joseph.madre)joseph.madre="María Melgar";
+  if(!joseph.nacimiento)joseph.nacimiento="14/03/1739";
+  if(!joseph.notas)joseph.notas="Bautizado el 14/03/1739.";
+}
+
+const santiago=buscarPersonaNombre("Santiago Galache García");
+if(santiago){
+  if(!santiago.padre)santiago.padre="Joseph Galache Melgar";
+  if(!santiago.madre)santiago.madre="Josefa García Paradinas";
+  if(!santiago.nacimiento)santiago.nacimiento="14/03/1775";
+}
+
+const florentina=buscarPersonaNombre("Florentina García");
+
+const celestino=buscarPersonaNombre("Celestino Galache García");
+if(celestino){
+  if(!celestino.padre)celestino.padre="Santiago Galache García";
+  if(!celestino.madre)celestino.madre="Florentina García";
+}
+
+const teodora=buscarPersonaNombre("Teodora Ayres");
+if(teodora){
+  if(!teodora.padre)teodora.padre="Juan José Ayres";
+  if(!teodora.madre)teodora.madre="María López";
+}
+
+const pedroAyres=buscarPersonaNombre("Pedro Galache Ayres");
+if(pedroAyres){
+  if(!pedroAyres.padre)pedroAyres.padre="Celestino Galache García";
+  if(!pedroAyres.madre)pedroAyres.madre="Teodora Ayres";
+  if(!pedroAyres.notas)pedroAyres.notas="Nacido el 31/01/1856 y bautizado el 03/02/1856 en Villavieja de Yeltes.";
+}
+
+const franciscaCelestino=asegurarPersona("Francisca","Galache","26/04/1854","Villavieja de Yeltes (Salamanca)");
+if(franciscaCelestino){
+  if(!franciscaCelestino.padre)franciscaCelestino.padre="Celestino Galache García";
+  if(!franciscaCelestino.madre)franciscaCelestino.madre="Teodora Ayres";
+}
+const uCelestino=asegurarUnion(celestino,teodora);
+if(uCelestino&&!uCelestino.hijos.some(h=>h.nombre.toLowerCase()==="francisca"))
+  addHijoUnion(uCelestino,"Francisca","26/04/1854","Villavieja de Yeltes (Salamanca)","T.A.");
+if(uCelestino&&pedroAyres&&!uCelestino.hijos.some(h=>h.nombre.toLowerCase()==="pedro"))
+  addHijoUnion(uCelestino,"Pedro","31/01/1856","Villavieja de Yeltes (Salamanca)","T.A.");
+
+const lucas=asegurarPersona("Lucas","Galache","1816","Villavieja de Yeltes (Salamanca)");
+const angel=asegurarPersona("Ángel","Galache","1818","Villavieja de Yeltes (Salamanca)");
+if(lucas){
+  if(!lucas.padre)lucas.padre="Santiago Galache García";
+  if(!lucas.madre)lucas.madre="Florentina García";
+}
+if(angel){
+  if(!angel.padre)angel.padre="Santiago Galache García";
+  if(!angel.madre)angel.madre="Florentina García";
+}
+const uSantiago=asegurarUnion(santiago,florentina);
+if(uSantiago&&lucas&&!uSantiago.hijos.some(h=>h.nombre.toLowerCase()==="lucas"))
+  addHijoUnion(uSantiago,"Lucas","1816","Villavieja de Yeltes (Salamanca)","F.G.");
+if(uSantiago&&angel&&!uSantiago.hijos.some(h=>h.nombre.toLowerCase()==="ángel"))
+  addHijoUnion(uSantiago,"Ángel","1818","Villavieja de Yeltes (Salamanca)","F.G.");
+
+const mariaFrancisca=asegurarPersona("María Francisca","Galache","","Villavieja de Yeltes (Salamanca)");
+if(mariaFrancisca){
+  if(!mariaFrancisca.padre)mariaFrancisca.padre="Ángel Galache";
+  if(!mariaFrancisca.madre)mariaFrancisca.madre="Francisca Hernández";
+}
+const anastasio=asegurarPersona("Anastasio","Galache","28/12/1861","Villavieja de Yeltes (Salamanca)");
+if(anastasio){
+  if(!anastasio.padre)anastasio.padre="Ángel Galache";
+  if(!anastasio.madre)anastasio.madre="Francisca Hernández";
+}
+const franciscaHernandez=asegurarPersona("Francisca","Hernández");
+const uAngel=asegurarUnion(angel,franciscaHernandez);
+if(uAngel&&mariaFrancisca&&!uAngel.hijos.some(h=>h.nombre.toLowerCase()==="maría francisca"))
+  addHijoUnion(uAngel,"María Francisca","","Villavieja de Yeltes (Salamanca)","F.H.");
+if(uAngel&&anastasio&&!uAngel.hijos.some(h=>h.nombre.toLowerCase()==="anastasio"))
+  addHijoUnion(uAngel,"Anastasio","28/12/1861","Villavieja de Yeltes (Salamanca)","F.H.");
+
+guardar();
 }
 
 function normalizarPersonas(){
@@ -1935,7 +2074,7 @@ ${u.persona2Id&&u.persona1Id&&false?"":""}
 </div>
 <div class="children-window">
 <h3>Hijos <span class="small">(${hijos.length})</span></h3>
-${hijos.length?`<table class="children-table"><thead><tr><th>Nombre</th><th>Madre</th><th>Fecha de nacimiento</th><th>Lugar de nacimiento</th></tr></thead><tbody>${hijos.map(h=>`<tr><td>${esc((h.nombre||"").split(/\s+/)[0]||"—")}</td><td class="child-mother">${esc(h.madreIniciales||esposaIniciales||"—")}</td><td>${esc(h.fechaNacimiento||"—")}</td><td>${esc(h.lugarNacimiento||"—")}</td></tr>`).join("")}</tbody></table>`:`<div class="small">Sin hijos registrados.</div>`}
+${hijos.length?`<table class="children-table"><thead><tr><th>Nombre</th><th>Madre</th><th>Fecha de nacimiento</th><th>Lugar de nacimiento</th></tr></thead><tbody>${hijos.map(h=>`<tr><td>${esc(h.nombre||"—")}</td><td class="child-mother">${esc(h.madreIniciales||esposaIniciales||"—")}</td><td>${esc(h.fechaNacimiento||"—")}</td><td>${esc(h.lugarNacimiento||"—")}</td></tr>`).join("")}</tbody></table>`:`<div class="small">Sin hijos registrados.</div>`}
 <div class="add-spouse-box">Si esta persona tuvo otro cónyuge, añádelo como una nueva pareja/unión. Cada unión conservará su propia lista de hijos.</div>
 </div>
 </div>
@@ -3240,6 +3379,8 @@ document.addEventListener("fullscreenchange",()=>{
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}
 
 cargar();
+normalizarPersonas();
+completarDatosInvestigacion();
 cargarEscudoGuardado();
 
 dibujarTodo();
