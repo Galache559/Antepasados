@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#10151c">
 <title>Antepasados GALACHE</title>
 <style>
 :root{--bg:#10151c;--card:#1b2430;--card2:#202b38;--line:#334354;--gold:#d8b36a;--gold2:#f0cf88;--text:#f2f4f7;--muted:#aeb8c4;--green:#75c99a;--blue:#73a9df;--red:#e58b8b;--purple:#c98db7;--shadow:0 10px 30px rgba(0,0,0,.28)}
@@ -3385,6 +3387,18 @@ cargarEscudoGuardado();
 
 dibujarTodo();
 
+</script>
+
+
+<script>
+/* Antepasados GALACHE: soporte de caché para uso sin conexión en GitHub Pages */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js').catch(function (err) {
+      console.warn('No se pudo registrar el modo sin conexión:', err);
+    });
+  });
+}
 </script>
 
 </body>
