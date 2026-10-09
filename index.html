@@ -1365,7 +1365,10 @@ function renderHistoria(){
 }
 
 function editarHistoria(){
- abrirModal("Historia del apellido GALACHE",`
+ // La ventana modal usa un título separado del contenido.
+ // Antes se pasaba el título como si fuera el contenido y no se mostraba el editor.
+ document.getElementById("modalTitulo").textContent="Historia del apellido GALACHE";
+ abrirModal(`
  <div class="history-editor">
  <p class="small">Escribe aquí la historia del apellido GALACHE y de su escudo. Puedes ampliarla tantas veces como quieras. No se añadirá ningún dato automáticamente.</p>
  <textarea id="historiaEditor" placeholder="Historia del apellido GALACHE y su escudo...">${esc(db.historia||"")}</textarea>
