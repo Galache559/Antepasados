@@ -1,0 +1,11 @@
+{
+  "name": "Antepasados GALACHE",
+  "short_name": "Antepasados",
+  "description": "Investigación genealógica familiar GALACHE.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10151c",
+  "theme_color": "#10151c"
+}
