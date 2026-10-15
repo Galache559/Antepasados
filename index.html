@@ -45,6 +45,20 @@ button{cursor:pointer}
 .person-card.female{border-left:4px solid var(--purple)}
 .person-card.galache{border:2px solid var(--gold)}
 .person-card.current{border:2px solid var(--gold2);box-shadow:0 0 0 1px rgba(216,179,106,.15)}
+
+.tree-dossier-action{margin:8px 0 4px}
+.tree-dossier-btn{font-size:.78rem;padding:7px 10px;width:100%;white-space:normal}
+.dossier-section{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}
+.dossier-section h3{margin:0 0 10px;color:var(--gold2)}
+.dossier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px}
+.dossier-field{padding:9px;border-radius:8px;background:rgba(255,255,255,.035);overflow-wrap:anywhere}
+.dossier-label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:3px}
+.dossier-value{white-space:pre-wrap;overflow-wrap:anywhere}
+.dossier-docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.dossier-doc{border:1px solid var(--line);border-radius:10px;padding:10px}
+.dossier-doc img{display:block;width:100%;max-height:420px;object-fit:contain;background:#fff;border-radius:7px;margin:8px 0}
+.dossier-empty{color:var(--muted);font-style:italic}
+@media(max-width:600px){.tree-dossier-btn{font-size:.75rem}.dossier-section{padding:10px}}
 .person-name{color:var(--text);font-size:17px;font-weight:bold;margin-bottom:8px}
 .person-meta{color:var(--muted);font-size:13px;line-height:1.55}
 .person-meta strong{color:#d7dde5}
@@ -1564,6 +1578,11 @@ onclick="mostrarDetalle('${p.id}')">
 
 <div class="person-name">
 ${esc(nombreCompleto(p))}
+</div>
+
+<div class="tree-dossier-action">
+<button class="btn gold tree-dossier-btn" type="button"
+onclick="event.stopPropagation();abrirExpedientePersona('${p.id}')">📂 Expediente completo</button>
 </div>
 
 <div class="person-meta">
@@ -3511,6 +3530,94 @@ alert(
 "Árbol inicial restaurado."
 );
 
+}
+
+
+function etiquetaCampoExpediente(k){
+ const labels={
+  nombre:"Nombre", apellidos:"Apellidos", nacimiento:"Nacimiento",
+  nacimientoLugar:"Lugar de nacimiento", fallecimiento:"Fallecimiento",
+  fallecimientoLugar:"Lugar de fallecimiento", padre:"Padre", madre:"Madre",
+  conyuge:"Cónyuge", certeza:"Estado de certeza", notas:"Notas",
+  historia:"Historia / biografía", sexo:"Sexo",
+  imagenBautismoParroquia:"Parroquia/localidad del bautismo",
+  imagenBautismoFecha:"Fecha del registro de bautismo",
+  imagenBautismoArchivo:"Archivo/signatura del bautismo",
+  imagenMatrimonioParroquia:"Parroquia/localidad del matrimonio",
+  imagenMatrimonioFecha:"Fecha del registro de matrimonio",
+  imagenMatrimonioArchivo:"Archivo/signatura del matrimonio"
+ };
+ return labels[k]||k.replace(/([A-Z])/g," $1").replace(/^./,s=>s.toUpperCase());
+}
+
+function abrirExpedientePersona(id){
+ const p=getPersona(id);
+ if(!p)return;
+ const camposImagen=new Set(["imagenBautismo","imagenMatrimonio"]);
+ const camposSistema=new Set(["id","principal"]);
+ const camposMetaImagen=new Set([
+  "imagenBautismoParroquia","imagenBautismoFecha","imagenBautismoArchivo",
+  "imagenMatrimonioParroquia","imagenMatrimonioFecha","imagenMatrimonioArchivo"
+ ]);
+ const datos=Object.entries(p).filter(([k,v])=>
+  !camposImagen.has(k)&&!camposSistema.has(k)&&!camposMetaImagen.has(k)&&
+  v!==null&&v!==undefined&&String(v).trim()!==""
+ );
+ let html=`<div class="person-dossier">
+  <div class="notice"><strong>Expediente genealógico completo.</strong> La información se obtiene de la ficha de PERSONAS y de los documentos vinculados a esta misma persona.</div>
+  <div class="dossier-section"><h3>👤 Datos de la persona</h3>
+   <div class="dossier-grid">`;
+ if(!datos.length) html+=`<div class="dossier-empty">Todavía no hay datos personales adicionales.</div>`;
+ datos.forEach(([k,v])=>{
+  if(typeof v==="object") v=JSON.stringify(v,null,2);
+  html+=`<div class="dossier-field"><span class="dossier-label">${esc(etiquetaCampoExpediente(k))}</span><div class="dossier-value">${esc(String(v))}</div></div>`;
+ });
+ html+=`</div></div>`;
+
+ const uniones=personaUniones(p.id)||[];
+ html+=`<div class="dossier-section"><h3>💍 Parejas, matrimonios e hijos</h3>`;
+ if(!uniones.length){
+  html+=`<div class="dossier-empty">No hay uniones registradas para esta persona.</div>`;
+ }else{
+  html+=`<div class="dossier-grid">`;
+  uniones.forEach(u=>{
+   const p1=getPersona(u.persona1Id),p2=getPersona(u.persona2Id);
+   const pareja=[p1,p2].filter(x=>x&&x.id!==p.id).map(nombreCompleto).join(", ");
+   const hijos=Array.isArray(u.hijos)?u.hijos:[];
+   html+=`<div class="dossier-field"><strong>${esc(pareja||"Pareja no especificada")}</strong>
+    <div class="dossier-value">Matrimonio: ${esc(u.matrimonio||"—")}<br>Lugar: ${esc(u.matrimonioLugar||"—")}<br>Hijos registrados en esta unión: ${hijos.length}</div>`;
+   if(hijos.length) html+=`<ul>${hijos.map(h=>`<li>${esc(h.nombre||"Sin nombre")}${h.fechaNacimiento?" · "+esc(h.fechaNacimiento):""}${h.lugarNacimiento?" · "+esc(h.lugarNacimiento):""}</li>`).join("")}</ul>`;
+   html+=`</div>`;
+  });
+  html+=`</div>`;
+ }
+ html+=`</div>`;
+
+ const docs=[
+  {tipo:"bautismo",titulo:"📜 Partida de bautismo",img:p.imagenBautismo,parroquia:p.imagenBautismoParroquia,fecha:p.imagenBautismoFecha,archivo:p.imagenBautismoArchivo},
+  {tipo:"matrimonio",titulo:"💍 Partida de matrimonio",img:p.imagenMatrimonio,parroquia:p.imagenMatrimonioParroquia,fecha:p.imagenMatrimonioFecha,archivo:p.imagenMatrimonioArchivo}
+ ];
+ html+=`<div class="dossier-section"><h3>🗂️ Documentos e imágenes</h3>`;
+ if(!docs.some(d=>d.img)){
+  html+=`<div class="dossier-empty">No hay imágenes de documentos asociadas a esta persona. Si se incorporan desde Editar ficha, aparecerán aquí y en el Índice de documentos.</div>`;
+ }else{
+  html+=`<div class="dossier-docs">`;
+  docs.filter(d=>d.img).forEach(d=>{
+   html+=`<div class="dossier-doc"><strong>${d.titulo}</strong>
+    <div class="dossier-value">Fecha: ${esc(d.fecha||"—")}<br>Parroquia/localidad: ${esc(d.parroquia||"—")}<br>Archivo/signatura: ${esc(d.archivo||"—")}</div>
+    <img src="${d.img}" alt="${esc(d.titulo)} de ${esc(nombreCompleto(p))}">
+    <button class="btn gold" type="button" onclick="verImagenRegistro('${p.id}','${d.tipo}')">🔎 Ampliar imagen</button>
+   </div>`;
+  });
+  html+=`</div>`;
+ }
+ html+=`</div>
+  <div class="form-actions">
+   <button class="btn gold" type="button" onclick="editarPersona('${p.id}')">✎ Editar ficha</button>
+   <button class="btn" type="button" onclick="cerrarModal()">Cerrar expediente</button>
+  </div></div>`;
+ abrirModal(html);
+ document.getElementById("modalTitulo").textContent="Expediente completo · "+nombreCompleto(p);
 }
 
 function renderDocumentos(){
