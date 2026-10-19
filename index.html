@@ -138,6 +138,8 @@ button{cursor:pointer}
 .family-view{display:flex;flex-direction:column;gap:14px}
 .family-couple{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
 .family-person-window{background:var(--card2);border:1px solid var(--line);border-radius:15px;padding:15px;min-width:0}
+.family-person-photo{display:block;width:104px;height:104px;max-width:100%;object-fit:cover;border-radius:12px;border:2px solid var(--gold);margin:0 auto 12px;cursor:zoom-in;background:#111820}
+.family-person-photo-placeholder{width:104px;height:104px;max-width:100%;border-radius:12px;border:1px dashed var(--line);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center}
 .family-person-window.male{border-left:4px solid var(--gold)}
 .family-person-window.female{border-left:4px solid var(--purple)}
 .family-person-window h3{margin:0 0 12px;color:var(--gold2);font-size:16px}
@@ -2014,6 +2016,7 @@ function renderPersonaWindow(p,titulo,clase=""){
 if(!p)return `<div class="family-person-window ${clase}"><h3>${esc(titulo)}</h3><div class="empty">Sin datos</div></div>`;
 return `<div class="family-person-window ${clase}">
 <h3>${esc(titulo)}</h3>
+${p.foto?`<img class="family-person-photo" src="${p.foto}" alt="Fotografía de ${esc(nombreCompleto(p))}" title="Pulsa para ampliar" onclick="verFotoPersona('${p.id}')">`:`<div class="family-person-photo-placeholder">Sin fotografía</div>`}
 <div class="family-person-name">${esc(nombreCompleto(p))}</div>
 <div class="family-person-data">
 <div><strong>📅 Fecha de nacimiento:</strong> ${esc(p.nacimiento||"—")}</div>
