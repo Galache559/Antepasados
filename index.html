@@ -1413,9 +1413,20 @@ function guardarHistoria(){
 }
 
 function guardar(){
-localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
-const ahora=new Date().toLocaleString("es-ES");
-localStorage.setItem("antepasados_galache_ultima_guardado",ahora);
+// Guardado protegido: no se cambia la clave principal si el navegador rechaza el dato.
+const contenido=JSON.stringify(db);
+try{
+ localStorage.setItem(STORAGE_KEY,contenido);
+ try{localStorage.setItem("antepasados_galache_ultima_guardado",new Date().toLocaleString("es-ES"));}catch(_e){}
+ return true;
+}catch(err){
+ // Si la cuota está llena, se conserva la base actual en memoria y se informa sin borrar datos.
+ const cuota=err && (err.name==="QuotaExceededError" || err.code===22 || err.code===1014);
+ if(cuota){
+  throw new Error("El almacenamiento del navegador está lleno. Tus cambios siguen en pantalla, pero NO se han guardado. No cierres ni recargues la página. Exporta primero una copia JSON desde la pestaña Copia. Esta versión comprime las nuevas imágenes con mayor fuerza; después habrá que liberar espacio o restaurar la copia en esta versión.");
+ }
+ throw err;
+ }
 }
 
 
@@ -2349,14 +2360,14 @@ function comprimirImagenRegistro(file){
    img.onerror=()=>reject(new Error("Imagen no válida"));
    img.onload=()=>{
     // Comprimir con más fuerza: localStorage suele tener un límite reducido.
-    const max=1000,ratio=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    const max=650,ratio=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
     const canvas=document.createElement("canvas");
     canvas.width=Math.max(1,Math.round(img.naturalWidth*ratio));
     canvas.height=Math.max(1,Math.round(img.naturalHeight*ratio));
     const ctx=canvas.getContext("2d");
     if(!ctx){reject(new Error("No se pudo preparar la imagen"));return;}
     ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    resolve(canvas.toDataURL("image/jpeg",0.55));
+    resolve(canvas.toDataURL("image/jpeg",0.48));
    };
    img.src=reader.result;
   };
