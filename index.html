@@ -1412,69 +1412,82 @@ function guardarHistoria(){
  cerrarModal();
 }
 
+// Las fotografías y documentos se guardan en IndexedDB, que admite mucho más espacio
+// que localStorage. Los datos familiares de texto siguen en localStorage.
+const PHOTO_DB_NAME = "antepasados_galache_fotos_v1";
+const PHOTO_STORE = "imagenes";
+let photoDbPromise = null;
+function abrirBDFotos(){
+ if(!("indexedDB" in window)) return Promise.reject(new Error("Este navegador no permite IndexedDB"));
+ if(photoDbPromise) return photoDbPromise;
+ photoDbPromise = new Promise((resolve,reject)=>{
+  const req=indexedDB.open(PHOTO_DB_NAME,1);
+  req.onupgradeneeded=()=>{const idb=req.result;if(!idb.objectStoreNames.contains(PHOTO_STORE))idb.createObjectStore(PHOTO_STORE,{keyPath:"id"});};
+  req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error||new Error("No se pudo abrir la base de imágenes"));
+ });
+ return photoDbPromise;
+}
+function camposImagen(p){return {foto:p.foto||"",imagenBautismo:p.imagenBautismo||"",imagenMatrimonio:p.imagenMatrimonio||""};}
+function guardarFotosIDB(){
+ return abrirBDFotos().then(idb=>new Promise((resolve,reject)=>{
+  const tx=idb.transaction(PHOTO_STORE,"readwrite"),store=tx.objectStore(PHOTO_STORE);
+  store.clear();
+  (db.personas||[]).forEach(p=>{const imgs=camposImagen(p);if(imgs.foto||imgs.imagenBautismo||imgs.imagenMatrimonio)store.put({id:String(p.id),...imgs});});
+  tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error||new Error("No se pudieron guardar las imágenes"));tx.onabort=()=>reject(tx.error||new Error("Guardado de imágenes cancelado"));
+ }));
+}
+function hidratarFotosIDB(){
+ return abrirBDFotos().then(idb=>new Promise((resolve,reject)=>{
+  const tx=idb.transaction(PHOTO_STORE,"readonly"),req=tx.objectStore(PHOTO_STORE).getAll();
+  req.onsuccess=()=>{const mapa=new Map((req.result||[]).map(x=>[String(x.id),x]));(db.personas||[]).forEach(p=>{const x=mapa.get(String(p.id));if(x){p.foto=x.foto||"";p.imagenBautismo=x.imagenBautismo||"";p.imagenMatrimonio=x.imagenMatrimonio||"";}});resolve(true);};
+  req.onerror=()=>reject(req.error||new Error("No se pudieron recuperar las imágenes"));
+ }));
+}
+function datosSinImagenes(){
+ const copia=JSON.parse(JSON.stringify(db));
+ (copia.personas||[]).forEach(p=>{delete p.foto;delete p.imagenBautismo;delete p.imagenMatrimonio;});
+ return JSON.stringify(copia);
+}
 function guardar(){
-// Guardado protegido: no se cambia la clave principal si el navegador rechaza el dato.
-const contenido=JSON.stringify(db);
-try{
- localStorage.setItem(STORAGE_KEY,contenido);
- try{localStorage.setItem("antepasados_galache_ultima_guardado",new Date().toLocaleString("es-ES"));}catch(_e){}
+ // Se escriben primero los datos ligeros; las imágenes van separadas a IndexedDB.
+ try{
+  localStorage.setItem(STORAGE_KEY,datosSinImagenes());
+  try{localStorage.setItem("antepasados_galache_ultima_guardado",new Date().toLocaleString("es-ES"));}catch(_e){}
+ }catch(err){
+  const cuota=err&&(err.name==="QuotaExceededError"||err.code===22||err.code===1014);
+  if(cuota)throw new Error("No se pudieron guardar los datos de texto. Exporta una copia JSON y no cierres la aplicación hasta tenerla guardada.");
+  throw err;
+ }
+ guardarFotosIDB().catch(err=>{console.error(err);alert("Los datos de texto se han guardado, pero no se han podido guardar las fotografías en este navegador. Exporta una copia JSON de seguridad.");});
  return true;
-}catch(err){
- // Si la cuota está llena, se conserva la base actual en memoria y se informa sin borrar datos.
- const cuota=err && (err.name==="QuotaExceededError" || err.code===22 || err.code===1014);
- if(cuota){
-  throw new Error("El almacenamiento del navegador está lleno. Tus cambios siguen en pantalla, pero NO se han guardado. No cierres ni recargues la página. Exporta primero una copia JSON desde la pestaña Copia. Esta versión comprime las nuevas imágenes con mayor fuerza; después habrá que liberar espacio o restaurar la copia en esta versión.");
- }
- throw err;
- }
 }
 
-
-function cargar(){
-
-let raw=
-localStorage.getItem(
-STORAGE_KEY
-);
-
-let migrando=false;
-
-if(!raw){
-
-raw=
-localStorage.getItem(
-LEGACY_STORAGE_KEY
-);
-
-migrando=!!raw;
-
+// Para operaciones críticas, no continuar hasta confirmar que IndexedDB ha terminado.
+async function guardarCompleto(){
+ guardar();
+ await guardarFotosIDB();
+ return true;
 }
 
-if(raw){
-
-try{
-
-db=JSON.parse(raw);
-
-normalizarPersonas();
-
-if(migrando)
-guardar();
-
-}catch(e){
-
-console.error(e);
-
-crearDatosIniciales();
-
-}
-
-}else{
-
-crearDatosIniciales();
-
-}
-
+async function cargar(){
+ let raw=localStorage.getItem(STORAGE_KEY),migrando=false;
+ if(!raw){raw=localStorage.getItem(LEGACY_STORAGE_KEY);migrando=!!raw;}
+ if(raw){
+  try{db=JSON.parse(raw);normalizarPersonas();}
+  catch(e){console.error(e);crearDatosIniciales();}
+ }else{crearDatosIniciales();}
+ // Si la copia antigua tenía imágenes dentro de localStorage, se migran a IndexedDB.
+ try{
+  await hidratarFotosIDB();
+  const tieneImagenes=(db.personas||[]).some(p=>p.foto||p.imagenBautismo||p.imagenMatrimonio);
+  if(tieneImagenes) await guardarFotosIDB();
+  // Compacta el registro antiguo: las imágenes dejan de ocupar la cuota de localStorage.
+  localStorage.setItem(STORAGE_KEY,datosSinImagenes());
+ }catch(e){console.warn("No se pudo completar la migración de imágenes",e);}
+ normalizarPersonas();
+ completarDatosInvestigacion();
+ cargarEscudoGuardado();
+ dibujarTodo();
 }
 
 function cargarEscudoGuardado(){
@@ -2277,7 +2290,7 @@ Fuentes documentales
 
 <div class="field full record-images-editor">
 <label>📷 Fotografía de la persona</label>
-<p class="small">La fotografía aparecerá en esta ficha y como miniatura en el árbol. Se guardará en los datos y en las copias JSON.</p>
+<p class="small">La fotografía aparecerá en esta ficha y como miniatura en el árbol. Se guarda en el almacenamiento de imágenes del navegador y se incluye en las copias JSON.</p>
 ${p.foto?`<div class="photo-editor"><img src="${p.foto}" alt="Fotografía de ${esc(nombreCompleto(p))}" onclick="verFotoPersona('${p.id}')"><label class="checkline"><input type="checkbox" id="fQuitarFoto"> Quitar fotografía guardada</label></div>`:'<div class="small">Todavía no hay fotografía guardada.</div>'}
 <input id="fFoto" type="file" accept="image/*">
 </div>
@@ -2514,7 +2527,7 @@ document.getElementById(
 ).value;
 
 try{
- guardar();
+ await guardarCompleto();
 }catch(err){
  if(btn){btn.disabled=false;btn.textContent="Guardar persona";}
  alert("No se han podido guardar los cambios. Puede que el almacenamiento del navegador esté lleno. Detalle: "+(err?.message||err)+". Prueba con una imagen recortada o más pequeña. No cierres esta ventana hasta resolverlo.");
@@ -3283,128 +3296,55 @@ onclick="nuevaFamilia('${id}')">
 
 }
 
-function exportarJSON(){
-
-guardar();
-
-const data=
-JSON.stringify(
-db,
-null,
-2
-);
-
-const blob=
-new Blob(
-[data],
-{
-type:"application/json"
-}
-);
-
-const url=
-URL.createObjectURL(
-blob
-);
-
-const a=
-document.createElement(
-"a"
-);
-
-const fecha=
-new Date()
-.toISOString()
-.slice(0,10);
-
-a.href=url;
-
-a.download=
-`Antepasados_GALACHE_${fecha}.json`;
-localStorage.setItem("antepasados_galache_ultima_exportacion",new Date().toLocaleString("es-ES"));
-
-document.body.appendChild(a);
-
-a.click();
-
-a.remove();
-
-URL.revokeObjectURL(url);
-
+async function exportarJSON(){
+ const boton=document.querySelector('button[onclick="exportarJSON()"]');
+ if(boton){boton.disabled=true;boton.textContent="Preparando copia…";}
+ try{
+  // Primero espera a que terminen todos los guardados de imágenes.
+  guardar();
+  await guardarFotosIDB();
+  const data=JSON.stringify(db,null,2);
+  const blob=new Blob([data],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  const fecha=new Date().toISOString().slice(0,10);
+  a.href=url;
+  a.download=`Antepasados_GALACHE_${fecha}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  try{localStorage.setItem("antepasados_galache_ultima_exportacion",new Date().toLocaleString("es-ES"));}catch(_e){}
+ }catch(e){
+  console.error(e);
+  alert("No se pudo completar la copia de seguridad, especialmente las fotografías. No cierres la aplicación. Detalle: "+(e?.message||e));
+ }finally{
+  if(boton){boton.disabled=false;boton.textContent="Exportar JSON";}
+ }
 }
 
-function importarJSON(){
-
-const input=
-document.getElementById(
-"archivoImportar"
-);
-
-const file=
-input.files[0];
-
-if(!file){
-
-alert(
-"Selecciona primero un archivo JSON."
-);
-
-return;
-
-}
-
-const reader=
-new FileReader();
-
-reader.onload=
-function(){
-
-try{
-
-const datos=
-JSON.parse(
-reader.result
-);
-
-if(
-!datos||
-!Array.isArray(
-datos.personas
-)
-){
-
-throw new Error(
-"Formato no válido"
-);
-
-}
-
-db=datos;
-
-normalizarPersonas();
-
-guardar();
-
-dibujarTodo();
-
-alert(
-"Copia importada correctamente."
-);
-
-}catch(e){
-
-console.error(e);
-
-alert(
-"No se ha podido importar la copia."
-);
-
-}
-
-};
-
-reader.readAsText(file);
-
+async function importarJSON(){
+ const input=document.getElementById("archivoImportar");
+ const file=input?.files?.[0];
+ if(!file){alert("Selecciona primero un archivo JSON.");return;}
+ try{
+  const texto=await file.text();
+  const datos=JSON.parse(texto);
+  if(!datos||!Array.isArray(datos.personas))throw new Error("El archivo no tiene el formato esperado (falta la lista de personas).");
+  if(!Array.isArray(datos.uniones))datos.uniones=[];
+  if(typeof datos.historia!=="string")datos.historia="";
+  // Validación básica de imágenes antes de sustituir los datos actuales.
+  db=datos;
+  normalizarPersonas();
+  // Guardar primero los datos de texto y esperar a que las imágenes se hayan escrito.
+  try{localStorage.setItem(STORAGE_KEY,datosSinImagenes());}
+  catch(e){throw new Error("El navegador no ha podido guardar los datos familiares. No se ha completado la importación. Detalle: "+(e?.message||e));}
+  await guardarFotosIDB();
+  dibujarTodo();
+  alert("Copia importada correctamente. Se han guardado los datos y las imágenes.");
+  input.value="";
+ }catch(e){
+  console.error(e);
+  alert("No se ha podido importar la copia. No borres el archivo JSON. Detalle: "+(e?.message||e));
+ }
 }
 
 function restaurarInicial(){
@@ -3450,12 +3390,7 @@ document.addEventListener("fullscreenchange",()=>{
 
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}
 
-cargar();
-normalizarPersonas();
-completarDatosInvestigacion();
-cargarEscudoGuardado();
-
-dibujarTodo();
+cargar().catch(err=>{console.error(err);alert("No se pudieron cargar los datos guardados. No borres los datos del navegador; importa tu copia JSON desde la pestaña Copia.");dibujarTodo();});
 
 </script>
 
