@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Antepasados GALACHE</title>
+<title>Antepasados GALACHE · Simplificado v10</title>
 <style>
 :root{--bg:#10151c;--card:#1b2430;--card2:#202b38;--line:#334354;--gold:#d8b36a;--gold2:#f0cf88;--text:#f2f4f7;--muted:#aeb8c4;--green:#75c99a;--blue:#73a9df;--red:#e58b8b;--purple:#c98db7;--shadow:0 10px 30px rgba(0,0,0,.28)}
 *{box-sizing:border-box}
@@ -27,6 +27,7 @@ button{cursor:pointer}
 
 .panel{display:none}
 .panel.active{display:block}
+#personas,#familias{display:none!important}
 
 .section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
 .section h2{margin:0 0 15px;color:var(--gold2);font-size:21px}
@@ -143,6 +144,7 @@ button{cursor:pointer}
 .family-person-window.male{border-left:4px solid var(--gold)}
 .family-person-window.female{border-left:4px solid var(--purple)}
 .family-person-window h3{margin:0 0 12px;color:var(--gold2);font-size:16px}
+.clickable-person{cursor:pointer}.clickable-person:hover{outline:2px solid var(--gold);outline-offset:2px}.person-open-link{font:inherit;color:inherit;background:transparent;border:0;padding:0;text-align:left;cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px}.person-open-link:hover,.person-open-link:focus{text-decoration-color:var(--gold);color:var(--gold2)}.child-open-link{font-weight:600}
 .family-person-name{font-size:18px;font-weight:bold;margin-bottom:10px;word-break:break-word}
 .family-person-data{display:grid;gap:7px;color:var(--muted);font-size:13px}
 .family-person-data strong{color:#d7dde5}
@@ -150,6 +152,11 @@ button{cursor:pointer}
 .spouse-card{background:#18212b;border:1px solid var(--line);border-radius:12px;padding:12px}
 .spouse-card .spouse-title{font-size:12px;color:var(--gold);font-weight:bold;margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
 .children-window{background:var(--card2);border:1px solid var(--line);border-radius:15px;padding:15px}
+.children-toggle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:11px 14px;border:1px solid var(--gold);border-radius:10px;background:rgba(216,179,106,.08);color:var(--gold2);font-weight:bold;text-align:center}
+.children-toggle:hover{background:rgba(216,179,106,.16)}
+.children-toggle .toggle-arrow{display:inline-block;transition:transform .18s}
+.children-toggle[aria-expanded="true"] .toggle-arrow{transform:rotate(180deg)}
+.children-window[hidden]{display:none!important}
 .children-window h3{margin:0 0 12px;color:var(--gold2);font-size:18px}
 .children-table{width:100%;border-collapse:collapse;font-size:13px}
 .children-table th,.children-table td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.07);text-align:left;vertical-align:top}
@@ -234,6 +241,7 @@ body.app-mode{overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .search-box input{flex:1;min-width:220px;background:#121a22;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 12px;outline:none}
 .search-box input:focus{border-color:var(--gold)}
 .search-results{margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.tree-search{width:100%;min-width:0;margin:12px 0}.tree-search input{min-width:0;width:100%}
 .search-result{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
 .search-result .small{flex:1}
 .source-box{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:11px;background:rgba(115,169,223,.04)}
@@ -245,7 +253,7 @@ body.app-mode{overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .spouse-number{display:inline-block;margin-left:7px;padding:3px 7px;border-radius:20px;background:#293442;color:var(--gold2);font-size:10px;font-weight:bold}
 @media(max-width:700px){
  .header-tools{right:10px;top:10px}.header-tool{padding:8px 9px;font-size:12px}.header-title{padding-top:4px}
-.search-box{min-width:640px}.search-results{min-width:640px}.source-box{font-size:12px}
+.search-box{min-width:0;width:100%}.search-results{min-width:0;width:100%}.search-result{align-items:flex-start;flex-wrap:wrap}.source-box{font-size:12px}
 }
 
 
@@ -286,25 +294,47 @@ body.app-mode{overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
 <nav class="tabs">
 
 <button class="tab active" data-tab="arbol">
-Árbol
+🌳 Árbol
 </button>
-
-<button class="tab" data-tab="personas">
-Personas
+<button class="tab" data-tab="investigacion">
+📚 Investigación
 </button>
-
-<button class="tab" data-tab="familias">
-Familias / Hijos
+<button class="tab" data-tab="fuentes">
+📜 Fuentes
 </button>
-
 <button class="tab" data-tab="copia">
-Copia
+💾 Copia
 </button>
 
 </nav>
 
 <main id="arbol" class="panel active">
 
+
+
+<section class="section">
+
+<div class="orientation-note">📱 Vista apaisada recomendada en móvil · Persona principal a la izquierda · Cónyuge a la derecha · Hijos debajo</div>
+
+<div class="tree-header">
+<h2>Árbol familiar</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn gold" onclick="nuevaPersona(true)">+ Añadir antepasado</button>
+<button class="btn" onclick="nuevaPersona(false)">+ Nueva persona</button>
+</div>
+</div>
+<div class="search-box tree-search"><input id="buscadorArbol" type="search" placeholder="🔎 Buscar cualquier familiar por nombre o apellido…" oninput="buscarPersonas()"><button class="btn" type="button" onclick="limpiarBuscador()">Limpiar</button></div>
+<div id="searchResults" class="search-results"></div>
+<div id="tree" class="tree"></div>
+
+</section>
+
+</main>
+
+<main id="investigacion" class="panel">
+<section class="section">
+<h2>📚 Investigación familiar</h2>
+<p class="small">Historia del apellido, procedencia, hipótesis y avances de la investigación genealógica.</p>
 <section class="history-box">
 
 <div class="history-head">
@@ -324,25 +354,15 @@ Copia
 </div>
 
 </section>
-
-<section class="section">
-
-<div class="orientation-note">📱 Vista apaisada recomendada en móvil · Persona principal a la izquierda · Cónyuge a la derecha · Hijos debajo</div>
-
-<div class="tree-header">
-
-<h2>Árbol familiar</h2>
-
-<button class="btn gold" onclick="nuevaPersona(true)">
-+ Añadir antepasado
-</button>
-
-</div>
-
-<div id="tree" class="tree"></div>
-
 </section>
+</main>
 
+<main id="fuentes" class="panel">
+<section class="section">
+<h2>📜 Fuentes documentales</h2>
+<p class="small">Aquí se reúnen los registros de bautismo y matrimonio guardados en las fichas personales. Pulsa en una persona para abrir su ficha completa y consultar los documentos.</p>
+<div id="fuentesGrid" class="family-list"></div>
+</section>
 </main>
 
 <main id="personas" class="panel">
@@ -499,7 +519,7 @@ onclick="cerrarModal()">
 
 <script>
 
-/* ===== FUNCIONES DE MODO APP v9 ===== */
+/* ===== FUNCIONES DE MODO APP v9 · navegación simplificada ===== */
 function irInicio(){
  const tab=document.querySelector('.tab[data-tab="arbol"]');
  if(tab)tab.click();
@@ -507,10 +527,10 @@ function irInicio(){
 }
 
 function abrirBuscador(){
- const tab=document.querySelector('.tab[data-tab="personas"]');
+ const tab=document.querySelector('.tab[data-tab="arbol"]');
  if(tab)tab.click();
  setTimeout(()=>{
-  const input=document.getElementById("buscadorPersonas");
+  const input=document.getElementById("buscadorArbol");
   if(input){input.focus();input.scrollIntoView({behavior:"smooth",block:"center"});}
  },80);
 }
@@ -1711,15 +1731,15 @@ cont.innerHTML=html.join("");
 }
 
 function buscarPersonas(){
-const input=document.getElementById("buscadorPersonas");
+const input=document.getElementById("buscadorArbol")||document.getElementById("buscadorPersonas");
 const cont=document.getElementById("searchResults");
 if(!input||!cont)return;
-const q=input.value.trim().toLowerCase();
+const q=input.value.trim().toLocaleLowerCase("es");
 if(!q){cont.innerHTML="";return;}
-const encontrados=db.personas.filter(p=>nombreCompleto(p).toLowerCase().includes(q)).slice(0,30);
-cont.innerHTML=encontrados.length?encontrados.map(p=>`<div class="search-result"><div><strong>${esc(nombreCompleto(p))}</strong><div class="small">${esc(p.nacimiento||"Fecha no indicada")} · ${esc(p.nacimientoLugar||"Lugar no indicado")}</div></div><button class="btn gold" type="button" onclick="mostrarDetalle('${p.id}')">Ver ficha</button></div>`).join(""):"<div class='empty'>No se han encontrado personas.</div>";
+const encontrados=db.personas.filter(p=>nombreCompleto(p).toLocaleLowerCase("es").includes(q)).slice(0,40);
+cont.innerHTML=encontrados.length?encontrados.map(p=>`<div class="search-result"><div style="display:flex;align-items:center;gap:10px;min-width:0">${p.foto?`<img src="${p.foto}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:50%;flex:none">`:''}<div><strong>${esc(nombreCompleto(p))}</strong><div class="small">${esc(p.nacimiento||"Fecha no indicada")} · ${esc(p.nacimientoLugar||"Lugar no indicado")}</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn gold" type="button" onclick="mostrarDetalle('${p.id}')">Ver ficha</button><button class="btn" type="button" onclick="editarPersona('${p.id}')">Editar</button></div></div>`).join(""):"<div class='empty'>No se han encontrado personas.</div>";
 }
-function limpiarBuscador(){const i=document.getElementById("buscadorPersonas");if(i)i.value="";buscarPersonas();}
+function limpiarBuscador(){const i=document.getElementById("buscadorArbol")||document.getElementById("buscadorPersonas");if(i)i.value="";buscarPersonas();}
 
 function fechaNacimientoOrden(p){
  const valor=String(p?.nacimiento||"").trim();
@@ -2014,10 +2034,10 @@ return letras.join(".")+ (letras.length?".":"");
 
 function renderPersonaWindow(p,titulo,clase=""){
 if(!p)return `<div class="family-person-window ${clase}"><h3>${esc(titulo)}</h3><div class="empty">Sin datos</div></div>`;
-return `<div class="family-person-window ${clase}">
+return `<div class="family-person-window ${clase} clickable-person" role="button" tabindex="0" title="Abrir expediente de ${esc(nombreCompleto(p))}" onclick="mostrarDetalle('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();mostrarDetalle('${p.id}')}">
 <h3>${esc(titulo)}</h3>
 ${p.foto?`<img class="family-person-photo" src="${p.foto}" alt="Fotografía de ${esc(nombreCompleto(p))}" title="Pulsa para ampliar" onclick="verFotoPersona('${p.id}')">`:`<div class="family-person-photo-placeholder">Sin fotografía</div>`}
-<div class="family-person-name">${esc(nombreCompleto(p))}</div>
+<button type="button" class="family-person-name person-open-link" onclick="event.stopPropagation();mostrarDetalle('${p.id}')" title="Abrir expediente">${esc(nombreCompleto(p))}</button>
 <div class="family-person-data">
 <div><strong>📅 Fecha de nacimiento:</strong> ${esc(p.nacimiento||"—")}</div>
 <div><strong>📍 Lugar de nacimiento:</strong> ${esc(p.nacimientoLugar||"—")}</div>
@@ -2053,14 +2073,47 @@ ${renderPersonaWindow(esposa,`CÓNYUGE ${esposaN||1}`,"female")}
 ${u.persona2Id&&u.persona1Id&&false?"":""}
 </div>
 </div>
-<div class="children-window">
+<button class="children-toggle" type="button" aria-expanded="false" aria-controls="union-hijos-${esc(String(u.id))}" onclick="alternarHijosUnion('${esc(String(u.id))}',this)">
+<span>👨‍👩‍👧‍👦 HIJOS (${hijos.length})</span><span class="toggle-arrow">▼</span>
+</button>
+<div class="children-window" id="union-hijos-${esc(String(u.id))}" hidden>
 <h3>Hijos <span class="small">(${hijos.length})</span></h3>
-${hijos.length?`<table class="children-table"><thead><tr><th>Nombre</th><th>Madre</th><th>Fecha de nacimiento</th><th>Lugar de nacimiento</th></tr></thead><tbody>${hijos.map(h=>`<tr><td>${esc(h.nombre||"—")}</td><td class="child-mother">${esc(h.madreIniciales||esposaIniciales||"—")}</td><td>${esc(h.fechaNacimiento||"—")}</td><td>${esc(h.lugarNacimiento||"—")}</td></tr>`).join("")}</tbody></table>`:`<div class="small">Sin hijos registrados.</div>`}
+${hijos.length?`<table class="children-table"><thead><tr><th>Nombre</th><th>Madre</th><th>Fecha de nacimiento</th><th>Lugar de nacimiento</th></tr></thead><tbody>${hijos.map(h=>`<tr><td><button type="button" class="person-open-link child-open-link" onclick="abrirExpedienteHijo('${esc(String(u.id))}','${esc(String(h.id||""))}')" title="Abrir expediente del hijo">${esc(h.nombre||"—")}</button></td><td class="child-mother">${esc(h.madreIniciales||esposaIniciales||"—")}</td><td>${esc(h.fechaNacimiento||"—")}</td><td>${esc(h.lugarNacimiento||"—")}</td></tr>`).join("")}</tbody></table>`:`<div class="small">Sin hijos registrados.</div>`}
 <div class="add-spouse-box">Si esta persona tuvo otro cónyuge, añádelo como una nueva pareja/unión. Cada unión conservará su propia lista de hijos.</div>
 </div>
 </div>
 </div>
 `;
+}
+
+function abrirExpedienteHijo(unionId,hijoId){
+ const u=db.uniones.find(x=>String(x.id)===String(unionId));
+ const h=(u?.hijos||[]).find(x=>String(x.id||"")===String(hijoId));
+ if(!h)return;
+ // Si el hijo ya tiene ficha propia, abrir su expediente completo.
+ const coincidencias=db.personas.filter(p=>String(p.nombre||"").trim().toLocaleLowerCase()===String(h.nombre||"").trim().toLocaleLowerCase());
+ if(coincidencias.length===1){mostrarDetalle(coincidencias[0].id);return;}
+ // Si todavía no tiene ficha individual, mostrar al menos los datos que constan en la unión.
+ const p1=getPersona(u.persona1Id), p2=getPersona(u.persona2Id);
+ document.getElementById("modalTitulo").textContent="Expediente del hijo · "+(h.nombre||"Sin nombre");
+ document.getElementById("modalContenido").innerHTML=`<div class="detail-box">
+ <div class="detail-row"><span class="detail-label">👤 Nombre</span><br><span class="detail-value">${esc(h.nombre||"—")}</span></div>
+ <div class="detail-row"><span class="detail-label">📅 Nacimiento</span><br><span class="detail-value">${esc(h.fechaNacimiento||"—")}</span></div>
+ <div class="detail-row"><span class="detail-label">📍 Lugar de nacimiento</span><br><span class="detail-value">${esc(h.lugarNacimiento||"—")}</span></div>
+ <div class="detail-row"><span class="detail-label">👨‍👩‍👧‍👦 Padres registrados</span><br><span class="detail-value">${esc([p1,p2].filter(Boolean).map(nombreCompleto).join(" + ")||"—")}</span></div>
+ <p class="small">Este hijo figura en la lista de la unión, pero todavía no tiene una ficha individual completa. Puedes crearla desde la gestión de personas para añadir apellidos, fotografía y documentos.</p>
+ </div><div class="form-actions"><button class="btn" type="button" onclick="cerrarModal()">Cerrar</button></div>`;
+ document.getElementById("modal").classList.add("show");
+}
+
+function alternarHijosUnion(unionId,boton){
+ const panel=document.getElementById(`union-hijos-${unionId}`);
+ if(!panel||!boton)return;
+ const abrir=panel.hidden;
+ panel.hidden=!abrir;
+ boton.setAttribute("aria-expanded",String(abrir));
+ const flecha=boton.querySelector(".toggle-arrow");
+ if(flecha)flecha.textContent=abrir?"▲":"▼";
 }
 
 function abrirModal(html){
@@ -3368,16 +3421,24 @@ alert(
 
 }
 
+function dibujarFuentes(){
+ const cont=document.getElementById("fuentesGrid");
+ if(!cont)return;
+ const registros=[];
+ db.personas.forEach(p=>{
+  if(p.imagenBautismo)registros.push({p,tipo:"Bautismo",fecha:p.imagenBautismoFecha||"",parroquia:p.imagenBautismoParroquia||"",archivo:p.imagenBautismoArchivo||""});
+  if(p.imagenMatrimonio)registros.push({p,tipo:"Matrimonio",fecha:p.imagenMatrimonioFecha||"",parroquia:p.imagenMatrimonioParroquia||"",archivo:p.imagenMatrimonioArchivo||""});
+ });
+ if(!registros.length){cont.innerHTML='<div class="empty">Todavía no hay imágenes de documentos guardadas en las fichas personales. Puedes añadirlas desde la ficha de cada persona.</div>';return;}
+ cont.innerHTML=registros.map(r=>`<div class="family-card" style="margin-bottom:10px"><div class="family-head"><div><div class="family-title">📜 ${esc(r.tipo)} · ${esc(nombreCompleto(r.p))}</div><div class="family-sub">${esc([r.fecha,r.parroquia,r.archivo].filter(Boolean).join(" · ")||"Datos del documento en la ficha personal")}</div></div><button class="btn gold" type="button" onclick="mostrarDetalle('${r.p.id}')">Abrir ficha y documento</button></div></div>`).join("");
+}
+
 function dibujarTodo(){
-
-renderHistoria();
-
-dibujarArbol();
-
-dibujarPersonas();
-
-dibujarFamilias();
-
+ renderHistoria();
+ dibujarArbol();
+ dibujarPersonas();
+ dibujarFamilias();
+ dibujarFuentes();
 }
 
 function activarPantallaCompleta(){
